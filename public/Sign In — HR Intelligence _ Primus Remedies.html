@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<!-- saved from url=(0054)file:///C:/Users/SCHEME_2/Desktop/HR/portal/login.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Primus Remedies HR Intelligence Portal — Secure Login. Smarter workforce decisions, powered by people intelligence.">
+  <title>Sign In — HR Intelligence | Primus Remedies</title>
+
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com/">
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+  <link href="./Sign In — HR Intelligence _ Primus Remedies_files/css2" rel="stylesheet">
+
+  <style>
+    /* ==============================================
+       CSS CUSTOM PROPERTIES
+       ============================================== */
+    :root {
+      /* Brand Colours */
+      --primus-green: #1B8C3D;
+      --primus-green-hover: #167832;
+      --primus-green-active: #126A2B;
+      --primus-green-light: #E8F5EC;
+      --primus-green-subtle: #F0FAF3;
+
+      /* Navy */
+      --navy: #0F1B2D;
+      --navy-light: #1A2942;
+      --navy-muted: #3A4A5C;
+
+      /* Neutrals */
+      --white: #FFFFFF;
+      --gray-50: #F8F9FB;
+      --gray-100: #F1F3F5;
+      --gray-200: #E5E8EB;
+      --gray-300: #D1D5DB;
+      --gray-400: #9CA3AF;
+      --gray-500: #6B7280;
+      --gray-600: #4B5563;
+      --gray-700: #374151;
+      --gray-800: #1F2937;
+
+      /* Accent Blues */
+      --blue-50: #EFF6FF;
+      --blue-100: #DBEAFE;
+      --blue-500: #3B82F6;
+
+      /* Functional */
+      --error: #DC2626;
+      --error-light: #FEF2F2;
+      --error-border: #FECACA;
+      --success: #16A34A;
+      --success-light: #F0FDF4;
+
+      /* Shadows */
+      --shadow-xs: 0 1px 2px rgba(15,27,45,0.04);
+      --shadow-sm: 0 1px 3px rgba(15,27,45,0.06), 0 1px 2px rgba(15,27,45,0.04);
+      --shadow-md: 0 4px 6px -1px rgba(15,27,45,0.06), 0 2px 4px -2px rgba(15,27,45,0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(15,27,45,0.06), 0 4px 6px -4px rgba(15,27,45,0.04);
+      --shadow-xl: 0 20px 25px -5px rgba(15,27,45,0.08), 0 8px 10px -6px rgba(15,27,45,0.04);
+      --shadow-input-focus: 0 0 0 3px rgba(27,140,61,0.12);
+      --shadow-btn: 0 1px 3px rgba(27,140,61,0.2), 0 1px 2px rgba(27,140,61,0.12);
+      --shadow-btn-hover: 0 4px 12px rgba(27,140,61,0.25), 0 2px 4px rgba(27,140,61,0.15);
+
+      /* Radii */
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+
+      /* Transitions */
+      --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+      /* Typography */
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --font-xs: 0.75rem;
+      --font-sm: 0.8125rem;
+      --font-base: 0.875rem;
+      --font-md: 1rem;
+      --font-lg: 1.125rem;
+      --font-xl: 1.25rem;
+      --font-2xl: 1.5rem;
+      --font-3xl: 1.875rem;
+      --line-height-tight: 1.25;
+      --line-height-normal: 1.5;
+      --line-height-relaxed: 1.625;
+
+      /* Layout */
+      --left-panel-width: 46%;
+    }
+
+    /* ==============================================
+       RESET & BASE
+       ============================================== */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+      -webkit-text-size-adjust: 100%;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: var(--gray-50);
+      color: var(--navy);
+      line-height: var(--line-height-normal);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    a { color: var(--primus-green); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    input { font-family: inherit; }
+
+    /* ==============================================
+       MAIN LAYOUT — TWO COLUMNS
+       ============================================== */
+    .login-wrapper {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    /* ==============================================
+       LEFT PANEL — BRAND EXPERIENCE
+       ============================================== */
+    .brand-panel {
+      width: var(--left-panel-width);
+      min-height: 100vh;
+      background: url('brand-bg.jpg') center center / cover no-repeat;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 3.5rem 3rem;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    /* Soft dark overlay for text readability */
+    .brand-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 27, 45, 0.35);
+      pointer-events: none;
+    }
+
+    /* Decorative elements hidden — background image provides branding */
+    .brand-decor-ring,
+    .brand-corner-tl,
+    .brand-corner-br {
+      display: none;
+    }
+
+    /* Brand Content */
+    .brand-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .brand-heading {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--white);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+
+
+    /* ==============================================
+       RIGHT PANEL — LOGIN FORM
+       ============================================== */
+    .login-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem 2rem;
+      background: var(--white);
+      position: relative;
+      min-height: 100vh;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-mobile-logo {
+      display: none;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .login-mobile-logo img {
+      height: 40px;
+      width: auto;
+    }
+
+    .login-mobile-brand {
+      font-size: var(--font-sm);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--navy);
+      margin-top: 0.5rem;
+    }
+
+    .login-header {
+      margin-bottom: 2rem;
+    }
+
+    .login-welcome {
+      font-size: var(--font-2xl);
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.01em;
+      margin-bottom: 0.5rem;
+    }
+
+    .login-subtitle {
+      font-size: var(--font-base);
+      color: var(--gray-500);
+      font-weight: 400;
+      line-height: var(--line-height-relaxed);
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.375rem;
+    }
+
+    .input-label {
+      font-size: var(--font-sm);
+      font-weight: 600;
+      color: var(--gray-700);
+      letter-spacing: 0.01em;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 0.875rem;
+      width: 18px;
+      height: 18px;
+      color: var(--gray-400);
+      pointer-events: none;
+      transition: color var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .input-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .input-field {
+      width: 100%;
+      height: 46px;
+      padding: 0 0.875rem 0 2.75rem;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      font-size: var(--font-base);
+      color: var(--navy);
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+    }
+
+    .input-field::placeholder {
+      color: var(--gray-400);
+      font-weight: 400;
+    }
+
+    .input-field:hover {
+      border-color: var(--gray-300);
+    }
+
+    .input-field:focus {
+      border-color: var(--primus-green);
+      box-shadow: var(--shadow-input-focus);
+      background: var(--white);
+    }
+
+    .input-wrapper:focus-within .input-icon {
+      color: var(--primus-green);
+    }
+
+    .input-field.input-error {
+      border-color: var(--error);
+      box-shadow: 0 0 0 3px rgba(220,38,38,0.08);
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 0.75rem;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      color: var(--gray-400);
+      transition: color var(--transition-fast), background var(--transition-fast);
+      background: transparent;
+    }
+
+    .password-toggle:hover {
+      color: var(--gray-600);
+      background: var(--gray-100);
+    }
+
+    .password-toggle:focus-visible {
+      outline: 2px solid var(--primus-green);
+      outline-offset: 1px;
+    }
+
+    .password-toggle svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .field-error {
+      font-size: var(--font-xs);
+      color: var(--error);
+      font-weight: 500;
+      min-height: 0;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height var(--transition-base), opacity var(--transition-base), margin var(--transition-base);
+      margin-top: 0;
+    }
+
+    .field-error.visible {
+      max-height: 2rem;
+      opacity: 1;
+      margin-top: 0.25rem;
+    }
+
+    .form-error {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--error-light);
+      border: 1px solid var(--error-border);
+      border-radius: var(--radius-md);
+      font-size: var(--font-sm);
+      color: var(--error);
+      font-weight: 500;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height var(--transition-smooth), opacity var(--transition-base), padding var(--transition-base), margin var(--transition-base);
+      padding: 0 1rem;
+      margin: 0;
+    }
+
+    .form-error.visible {
+      max-height: 4rem;
+      opacity: 1;
+      padding: 0.75rem 1rem;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .form-error-icon {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+    }
+
+    .login-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: -0.25rem;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .checkbox-input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .checkbox-custom {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--gray-300);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color var(--transition-fast), background var(--transition-fast);
+      flex-shrink: 0;
+    }
+
+    .checkbox-custom svg {
+      width: 10px;
+      height: 10px;
+      stroke: var(--white);
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .checkbox-input:checked + .checkbox-custom {
+      background: var(--primus-green);
+      border-color: var(--primus-green);
+    }
+
+    .checkbox-input:checked + .checkbox-custom svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .checkbox-input:focus-visible + .checkbox-custom {
+      outline: 2px solid var(--primus-green);
+      outline-offset: 2px;
+    }
+
+    .checkbox-label {
+      font-size: var(--font-sm);
+      color: var(--gray-600);
+      font-weight: 450;
+    }
+
+    .forgot-link {
+      font-size: var(--font-sm);
+      font-weight: 500;
+      color: var(--primus-green);
+      transition: color var(--transition-fast);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .forgot-link:hover {
+      color: var(--primus-green-hover);
+      text-decoration: underline;
+    }
+
+    .forgot-link:focus-visible {
+      outline: 2px solid var(--primus-green);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    .btn-signin {
+      width: 100%;
+      height: 46px;
+      background: var(--primus-green);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: var(--font-base);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: var(--shadow-btn);
+      transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+      margin-top: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-signin:hover:not(:disabled) {
+      background: var(--primus-green-hover);
+      box-shadow: var(--shadow-btn-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-signin:active:not(:disabled) {
+      background: var(--primus-green-active);
+      transform: translateY(0);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-signin:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-signin:focus-visible {
+      outline: 2px solid var(--primus-green);
+      outline-offset: 2px;
+    }
+
+    .btn-spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: var(--white);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+
+    .btn-signin.loading .btn-text { opacity: 0; }
+    .btn-signin.loading .btn-spinner { display: block; position: absolute; }
+    .btn-signin.loading { pointer-events: none; }
+
+    .btn-signin.success {
+      background: var(--success);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .login-secure {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.375rem;
+      margin-top: 1.25rem;
+      font-size: var(--font-xs);
+      color: var(--gray-400);
+      font-weight: 450;
+      letter-spacing: 0.01em;
+    }
+
+    .login-secure svg {
+      width: 13px;
+      height: 13px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .login-footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 1.25rem 2rem;
+      text-align: center;
+      border-top: 1px solid var(--gray-100);
+    }
+
+    .login-footer-text {
+      font-size: var(--font-xs);
+      color: var(--gray-400);
+      line-height: var(--line-height-relaxed);
+    }
+
+    .login-footer-text span {
+      display: block;
+    }
+
+    /* ==============================================
+       FORGOT PASSWORD MODAL
+       ============================================== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,27,45,0.4);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition-smooth), visibility var(--transition-smooth);
+      padding: 1.5rem;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-card {
+      background: var(--white);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-xl);
+      width: 100%;
+      max-width: 420px;
+      padding: 2rem;
+      transform: translateY(12px) scale(0.98);
+      transition: transform var(--transition-smooth);
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .modal-title {
+      font-size: var(--font-lg);
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .modal-close-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      color: var(--gray-400);
+      transition: color var(--transition-fast), background var(--transition-fast);
+    }
+
+    .modal-close-btn:hover {
+      color: var(--gray-700);
+      background: var(--gray-100);
+    }
+
+    .modal-close-btn:focus-visible {
+      outline: 2px solid var(--primus-green);
+      outline-offset: 1px;
+    }
+
+    .modal-close-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .modal-desc {
+      font-size: var(--font-sm);
+      color: var(--gray-500);
+      line-height: var(--line-height-relaxed);
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .btn-reset {
+      width: 100%;
+      height: 44px;
+      background: var(--primus-green);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: var(--font-base);
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      box-shadow: var(--shadow-btn);
+      transition: background var(--transition-fast), box-shadow var(--transition-fast);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-reset:hover:not(:disabled) {
+      background: var(--primus-green-hover);
+      box-shadow: var(--shadow-btn-hover);
+    }
+
+    .btn-reset:focus-visible {
+      outline: 2px solid var(--primus-green);
+      outline-offset: 2px;
+    }
+
+    .btn-reset:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .modal-success {
+      display: none;
+      text-align: center;
+      padding: 1rem 0;
+    }
+
+    .modal-success.visible {
+      display: block;
+    }
+
+    .modal-success-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--primus-green-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+    }
+
+    .modal-success-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--primus-green);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .modal-success-title {
+      font-size: var(--font-md);
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 0.375rem;
+    }
+
+    .modal-success-text {
+      font-size: var(--font-sm);
+      color: var(--gray-500);
+      line-height: var(--line-height-relaxed);
+    }
+
+    /* ==============================================
+       RESPONSIVE — TABLET
+       ============================================== */
+    @media (max-width: 1024px) {
+      .brand-panel {
+        width: 42%;
+        padding: 2.5rem 2rem;
+      }
+
+      .brand-logo img { height: 44px; }
+      .brand-product-name { font-size: 1.375rem; }
+      .brand-tagline { font-size: var(--font-base); }
+      .brand-features { display: none; }
+      .brand-badge { bottom: 2rem; left: 2rem; }
+      .login-panel { padding: 2.5rem 2rem; }
+    }
+
+    /* ==============================================
+       RESPONSIVE — SMALL TABLET / LANDSCAPE PHONE
+       ============================================== */
+    @media (max-width: 768px) {
+      .login-wrapper { flex-direction: column; }
+      .brand-panel { display: none; }
+
+      .login-panel {
+        min-height: 100vh;
+        padding: 2rem 1.5rem;
+        justify-content: center;
+      }
+
+      .login-mobile-logo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .login-container { max-width: 380px; }
+
+      .login-footer {
+        position: relative;
+        margin-top: 2rem;
+        padding: 1.25rem 0 0;
+      }
+    }
+
+    /* ==============================================
+       RESPONSIVE — MOBILE
+       ============================================== */
+    @media (max-width: 430px) {
+      .login-panel { padding: 1.5rem 1.25rem; }
+      .login-welcome { font-size: var(--font-xl); }
+      .login-subtitle { font-size: var(--font-sm); }
+      .input-field { height: 48px; font-size: var(--font-md); }
+      .btn-signin { height: 48px; font-size: var(--font-md); }
+      .modal-card { padding: 1.5rem; margin: 1rem; }
+    }
+
+    /* ==============================================
+       REDUCED MOTION
+       ============================================== */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ============================================
+       MAIN LOGIN LAYOUT
+       ============================================ -->
+  <div class="login-wrapper">
+
+    <!-- LEFT — BRAND PANEL -->
+    <aside class="brand-panel" aria-hidden="true">
+      <div class="brand-content">
+        <h2 class="brand-heading"></h2>
+      </div>
+    </aside>
+
+    <!-- RIGHT — LOGIN PANEL -->
+    <main class="login-panel" role="main">
+      <div class="login-container">
+
+        <!-- Mobile Logo -->
+        <div class="login-mobile-logo">
+          <img id="mobileLogo" alt="Primus Remedies" height="40" src="./Sign In — HR Intelligence _ Primus Remedies_files/primus-logo.png">
+          <div class="login-mobile-brand">HR INTELLIGENCE</div>
+        </div>
+
+        <!-- Header -->
+        <header class="login-header">
+          <h1 class="login-welcome">Welcome Back</h1>
+          <p class="login-subtitle">Sign in to your HR Intelligence account</p>
+        </header>
+
+        <!-- Form-level error -->
+        <div class="form-error" id="formError" role="alert" aria-live="polite">
+          <svg class="form-error-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span id="formErrorText"></span>
+        </div>
+
+        <!-- Login Form -->
+        <form class="login-form" id="loginForm" novalidate="" autocomplete="on">
+
+          <!-- Employee ID / Email -->
+          <div class="input-group">
+            <label class="input-label" for="employeeId">Employee ID / Email</label>
+            <div class="input-wrapper">
+              <span class="input-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </span>
+              <input type="text" class="input-field" id="employeeId" name="employeeId" placeholder="Enter your Employee ID or email" autocomplete="username" required="" aria-describedby="employeeIdError">
+            </div>
+            <div class="field-error" id="employeeIdError" role="alert" aria-live="polite">Please enter your Employee ID or email.</div>
+          </div>
+
+          <!-- Password -->
+          <div class="input-group">
+            <label class="input-label" for="password">Password</label>
+            <div class="input-wrapper">
+              <span class="input-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </span>
+              <input type="password" class="input-field" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required="" aria-describedby="passwordError">
+              <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password" tabindex="0">
+                <svg id="eyeIcon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg id="eyeOffIcon" viewBox="0 0 24 24" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+              </button>
+            </div>
+            <div class="field-error" id="passwordError" role="alert" aria-live="polite">Please enter your password.</div>
+          </div>
+
+          <!-- Options Row -->
+          <div class="login-options">
+            <label class="checkbox-group" for="rememberMe">
+              <input type="checkbox" class="checkbox-input" id="rememberMe" name="rememberMe">
+              <span class="checkbox-custom">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span class="checkbox-label">Remember me</span>
+            </label>
+            <button type="button" class="forgot-link" id="forgotPasswordBtn">Forgot password?</button>
+          </div>
+
+          <!-- Sign In -->
+          <button type="submit" class="btn-signin" id="signinBtn">
+            <span class="btn-text">SIGN IN</span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+          </button>
+        </form>
+
+        <!-- Secure access -->
+        <div class="login-secure">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          Secure access to HR Intelligence
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="login-footer">
+        <p class="login-footer-text">
+          <span>© 2026 Primus Remedies Private Limited</span>
+          <span>Secure HR Intelligence Platform</span>
+        </p>
+      </footer>
+    </main>
+  </div>
+
+  <!-- ============================================
+       FORGOT PASSWORD MODAL
+       ============================================ -->
+  <div class="modal-overlay" id="forgotModal" role="dialog" aria-modal="true" aria-labelledby="forgotModalTitle">
+    <div class="modal-card">
+      <!-- Form View -->
+      <div id="forgotFormView">
+        <div class="modal-head">
+          <h2 class="modal-title" id="forgotModalTitle">Reset Password</h2>
+          <button class="modal-close-btn" id="forgotCloseBtn" aria-label="Close">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <p class="modal-desc">Enter your Employee ID or registered email and we'll send you a link to reset your password.</p>
+        <form class="modal-form" id="forgotForm" novalidate="">
+          <div class="input-group">
+            <label class="input-label" for="resetEmail">Employee ID / Email</label>
+            <div class="input-wrapper">
+              <span class="input-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              </span>
+              <input type="text" class="input-field" id="resetEmail" name="resetEmail" placeholder="Enter your Employee ID or email" required="" aria-describedby="resetEmailError">
+            </div>
+            <div class="field-error" id="resetEmailError" role="alert" aria-live="polite">Please enter your Employee ID or email.</div>
+          </div>
+          <button type="submit" class="btn-reset" id="resetBtn">SEND RESET LINK</button>
+        </form>
+      </div>
+
+      <!-- Success View -->
+      <div class="modal-success" id="forgotSuccessView">
+        <div class="modal-success-icon">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <div class="modal-success-title">Check your inbox</div>
+        <p class="modal-success-text">Reset instructions have been sent to your registered email address.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       JAVASCRIPT
+       ============================================ -->
+  <script>
+  (function() {
+    'use strict';
+
+    // ==========================================
+    // CONFIGURATION — Edit these values as needed
+    // ==========================================
+    const LOGO_PATH     = "primus-logo.png";
+    const DASHBOARD_URL = "HR_Intelligence_Dashboard.html";
+    const AUTH_API_URL   = "/api/auth/login";
+
+    // ==========================================
+    // DOM REFERENCES
+    // ==========================================
+    const $ = (sel) => document.querySelector(sel);
+    const form         = $('#loginForm');
+    const employeeId   = $('#employeeId');
+    const password     = $('#password');
+    const signinBtn    = $('#signinBtn');
+    const formError    = $('#formError');
+    const formErrorTxt = $('#formErrorText');
+    const pwdToggle    = $('#passwordToggle');
+    const eyeIcon      = $('#eyeIcon');
+    const eyeOffIcon   = $('#eyeOffIcon');
+    const forgotBtn    = $('#forgotPasswordBtn');
+    const forgotModal  = $('#forgotModal');
+    const forgotClose  = $('#forgotCloseBtn');
+    const forgotForm   = $('#forgotForm');
+    const forgotFormV  = $('#forgotFormView');
+    const forgotSuccV  = $('#forgotSuccessView');
+    const resetEmail   = $('#resetEmail');
+
+    // ==========================================
+    // LOGO SETUP
+    // ==========================================
+    const brandLogo  = $('#brandLogo');
+    const mobileLogo = $('#mobileLogo');
+    if (brandLogo)  brandLogo.src  = LOGO_PATH;
+    if (mobileLogo) mobileLogo.src = LOGO_PATH;
+
+    // ==========================================
+    // UTILITY FUNCTIONS
+    // ==========================================
+    function showFieldError(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('visible');
+    }
+
+    function hideFieldError(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('visible');
+    }
+
+    function showFormError(msg) {
+      formErrorTxt.textContent = msg;
+      formError.classList.add('visible');
+    }
+
+    function hideFormError() {
+      formError.classList.remove('visible');
+    }
+
+    function setLoading(loading) {
+      if (loading) {
+        signinBtn.classList.add('loading');
+        signinBtn.disabled = true;
+      } else {
+        signinBtn.classList.remove('loading');
+        signinBtn.disabled = false;
+      }
+    }
+
+    function setSuccess() {
+      signinBtn.classList.remove('loading');
+      signinBtn.classList.add('success');
+      const btnText = signinBtn.querySelector('.btn-text');
+      btnText.textContent = '\u2713 SUCCESS';
+      btnText.style.opacity = '1';
+    }
+
+    // ==========================================
+    // VALIDATION
+    // ==========================================
+    function validateForm() {
+      let isValid = true;
+      hideFormError();
+
+      if (!employeeId.value.trim()) {
+        showFieldError('employeeIdError');
+        employeeId.classList.add('input-error');
+        isValid = false;
+      } else {
+        hideFieldError('employeeIdError');
+        employeeId.classList.remove('input-error');
+      }
+
+      if (!password.value) {
+        showFieldError('passwordError');
+        password.classList.add('input-error');
+        isValid = false;
+      } else {
+        hideFieldError('passwordError');
+        password.classList.remove('input-error');
+      }
+
+      return isValid;
+    }
+
+    // Clear errors on input
+    employeeId.addEventListener('input', function() {
+      hideFieldError('employeeIdError');
+      this.classList.remove('input-error');
+      hideFormError();
+    });
+
+    password.addEventListener('input', function() {
+      hideFieldError('passwordError');
+      this.classList.remove('input-error');
+      hideFormError();
+    });
+
+    // ==========================================
+    // MOCK AUTHENTICATION
+    // ==========================================
+
+    // DEVELOPMENT DEMO ONLY
+    // Replace this function with the production authentication API.
+    // NEVER connect this frontend directly to the database.
+    //
+    // Future production architecture:
+    //   LOGIN HTML  →  AUTH API (AUTH_API_URL)  →  Database/Auth Service  →  Secure Session  →  Dashboard
+    //
+    // The frontend must NEVER contain:
+    //   - database passwords or connection strings
+    //   - service-role keys
+    //   - private API keys
+    //   - authentication secrets
+    //
+    // Do NOT store passwords in localStorage or sessionStorage.
+
+    async function loginUser(employeeIdVal, passwordVal) {
+      // Simulate network latency
+      await new Promise(resolve => setTimeout(resolve, 1200));
+
+      // Demo validation — accepts any non-empty credentials
+      if (employeeIdVal && passwordVal) {
+        return { success: true, user: { id: employeeIdVal, name: 'HR User' } };
+      }
+
+      return { success: false, message: 'Invalid login credentials.' };
+    }
+
+    // ==========================================
+    // FORM SUBMISSION
+    // ==========================================
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      if (!validateForm()) return;
+
+      setLoading(true);
+
+      try {
+        const result = await loginUser(
+          employeeId.value.trim(),
+          password.value
+        );
+
+        if (result.success) {
+          setSuccess();
+          // Redirect after brief success feedback
+          setTimeout(function() {
+            window.location.href = DASHBOARD_URL;
+          }, 600);
+        } else {
+          setLoading(false);
+          showFormError(result.message || 'Invalid login credentials.');
+        }
+      } catch (err) {
+        setLoading(false);
+        showFormError('Unable to connect. Please try again.');
+      }
+    });
+
+    // ==========================================
+    // PASSWORD TOGGLE
+    // ==========================================
+    pwdToggle.addEventListener('click', function() {
+      const isPassword = password.type === 'password';
+      password.type = isPassword ? 'text' : 'password';
+      eyeIcon.style.display    = isPassword ? 'none'  : 'block';
+      eyeOffIcon.style.display = isPassword ? 'block' : 'none';
+      this.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+      password.focus();
+    });
+
+    // ==========================================
+    // FORGOT PASSWORD MODAL
+    // ==========================================
+    function openForgotModal() {
+      forgotFormV.style.display = 'block';
+      forgotSuccV.classList.remove('visible');
+      forgotModal.classList.add('active');
+      resetEmail.value = '';
+      hideFieldError('resetEmailError');
+      resetEmail.classList.remove('input-error');
+      setTimeout(function() { resetEmail.focus(); }, 200);
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeForgotModal() {
+      forgotModal.classList.remove('active');
+      document.body.style.overflow = '';
+      forgotBtn.focus();
+    }
+
+    forgotBtn.addEventListener('click', openForgotModal);
+    forgotClose.addEventListener('click', closeForgotModal);
+
+    forgotModal.addEventListener('click', function(e) {
+      if (e.target === forgotModal) closeForgotModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && forgotModal.classList.contains('active')) {
+        closeForgotModal();
+      }
+    });
+
+    forgotForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      if (!resetEmail.value.trim()) {
+        showFieldError('resetEmailError');
+        resetEmail.classList.add('input-error');
+        return;
+      }
+
+      hideFieldError('resetEmailError');
+      resetEmail.classList.remove('input-error');
+
+      const btn = $('#resetBtn');
+      btn.disabled = true;
+      btn.textContent = 'SENDING\u2026';
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      btn.disabled = false;
+      btn.textContent = 'SEND RESET LINK';
+
+      // Show success
+      forgotFormV.style.display = 'none';
+      forgotSuccV.classList.add('visible');
+
+      // Auto-close after 3s
+      setTimeout(closeForgotModal, 3000);
+    });
+
+    resetEmail.addEventListener('input', function() {
+      hideFieldError('resetEmailError');
+      this.classList.remove('input-error');
+    });
+
+    // ==========================================
+    // KEYBOARD: ENTER TO SUBMIT
+    // ==========================================
+    form.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') {
+        e.preventDefault();
+        form.dispatchEvent(new Event('submit', { cancelable: true }));
+      }
+    });
+
+    // ==========================================
+    // INITIAL FOCUS
+    // ==========================================
+    window.addEventListener('DOMContentLoaded', function() {
+      employeeId.focus();
+    });
+
+  })();
+  </script>
+
+
+
+</body></html>

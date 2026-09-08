@@ -1,0 +1,857 @@
+[
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Executive",
+        "EmployeeName":  "Mistu Sarkar Chakraborty",
+        "EmployeeCode":  "PRI1093",
+        "SlNo":  "1",
+        "DOJ":  "01-Apr-26",
+        "HQ":  "South Kolkata"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Executive",
+        "EmployeeName":  "Sanjay Majumdar",
+        "EmployeeCode":  "PRI1094",
+        "SlNo":  "2",
+        "DOJ":  "01-Apr-26",
+        "HQ":  "Bongaon"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Arjunan R",
+        "EmployeeCode":  "PRI1095",
+        "SlNo":  "3",
+        "DOJ":  "01-Apr-26",
+        "HQ":  "Chennai"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Perala Kiran",
+        "EmployeeCode":  "PRI1096",
+        "SlNo":  "4",
+        "DOJ":  "01-Apr-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Executive",
+        "EmployeeName":  "Goutam Misra",
+        "EmployeeCode":  "PRI1097",
+        "SlNo":  "5",
+        "DOJ":  "02-Apr-26",
+        "HQ":  "Midnapore"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Executive",
+        "EmployeeName":  "DebrataSingha",
+        "EmployeeCode":  "PRI1098",
+        "SlNo":  "6",
+        "DOJ":  "02-Apr-26",
+        "HQ":  "Malda"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Regional Training Manager",
+        "EmployeeName":  "Manisha Shaw",
+        "EmployeeCode":  "PRI1099",
+        "SlNo":  "7",
+        "DOJ":  "02-Apr-26",
+        "HQ":  "Kolkata"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Executive",
+        "EmployeeName":  "Sudipta Das",
+        "EmployeeCode":  "PRI1100",
+        "SlNo":  "8",
+        "DOJ":  "02-Apr-26",
+        "HQ":  "Kakdwip"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Area Business Manager",
+        "EmployeeName":  "Pothurajulu Suman",
+        "EmployeeCode":  "PRI1101",
+        "SlNo":  "9",
+        "DOJ":  "04-Apr-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Muthukumar N",
+        "EmployeeCode":  "PRI1102",
+        "SlNo":  "10",
+        "DOJ":  "06-Apr-26",
+        "HQ":  "Tanjore"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Ganesh Sanjay Khedkar",
+        "EmployeeCode":  "PRI1103",
+        "SlNo":  "11",
+        "DOJ":  "08-Apr-26",
+        "HQ":  "Akola"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Rahul Prakash Sananse",
+        "EmployeeCode":  "PRI1104",
+        "SlNo":  "12",
+        "DOJ":  "08-Apr-26",
+        "HQ":  "Jalgaon"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Manjunatha",
+        "EmployeeCode":  "PRI1105",
+        "SlNo":  "13",
+        "DOJ":  "13-Apr-26",
+        "HQ":  "Hubli"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Manchala Swetha",
+        "EmployeeCode":  "PRI1106",
+        "SlNo":  "14",
+        "DOJ":  "15-Apr-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "V Naresh Chary",
+        "EmployeeCode":  "PRI1107",
+        "SlNo":  "15",
+        "DOJ":  "16-Apr-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Goguri Ramya Krishna",
+        "EmployeeCode":  "PRI1108",
+        "SlNo":  "16",
+        "DOJ":  "16-Apr-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Katlla R Sekhar Reddy",
+        "EmployeeCode":  "PRI1109",
+        "SlNo":  "17",
+        "DOJ":  "16-Apr-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Kambampati Bhaskar",
+        "EmployeeCode":  "PRI1110",
+        "SlNo":  "18",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Suprim",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Priyanka Sudhir Bhatkar",
+        "EmployeeCode":  "PRI1111",
+        "SlNo":  "19",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "Chandrapur"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Sanagavarapu Lakshmi Padmavathi",
+        "EmployeeCode":  "PRI1112",
+        "SlNo":  "20",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Nimmagadda Satya Revathi",
+        "EmployeeCode":  "PRI1113",
+        "SlNo":  "21",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Pavithra K",
+        "EmployeeCode":  "PRI1114",
+        "SlNo":  "22",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "Bangalore"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Poornima P",
+        "EmployeeCode":  "PRI1115",
+        "SlNo":  "23",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "Mysore"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Rashmi C",
+        "EmployeeCode":  "PRI1116",
+        "SlNo":  "24",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "Mysore"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Manu L",
+        "EmployeeCode":  "PRI1117",
+        "SlNo":  "25",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "Mysore"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Santosh N",
+        "EmployeeCode":  "PRI1118",
+        "SlNo":  "26",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "Hubli"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Mamatha B",
+        "EmployeeCode":  "PRI1119",
+        "SlNo":  "27",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "Hubli"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Sanjivani Prashant Lambture",
+        "EmployeeCode":  "PRI1120",
+        "SlNo":  "28",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "Nagpur"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Suvarna Yogesh Vyawhare",
+        "EmployeeCode":  "PRI1121",
+        "SlNo":  "29",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "Aurangabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Sandeep Bhimashankar Gore",
+        "EmployeeCode":  "PRI1122",
+        "SlNo":  "30",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "Nanded"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Dinesh Kumar M",
+        "EmployeeCode":  "PRI1123",
+        "SlNo":  "31",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "Bangalore"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Jhuma Acharjee",
+        "EmployeeCode":  "PRI1124",
+        "SlNo":  "32",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "North Kolkata"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Chhandasri Roy",
+        "EmployeeCode":  "PRI1125",
+        "SlNo":  "33",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "South Kolkata"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Nitu",
+        "EmployeeCode":  "PRI1126",
+        "SlNo":  "34",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "Patna"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Bhanupriya J T",
+        "EmployeeCode":  "PRI1127",
+        "SlNo":  "35",
+        "DOJ":  "20-Apr-26",
+        "HQ":  "Bangalore"
+    },
+    {
+        "Division":  "Suprim",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Rohit Suryakant Andhare",
+        "EmployeeCode":  "PRI1128",
+        "SlNo":  "36",
+        "DOJ":  "28-Apr-26",
+        "HQ":  "Latur"
+    },
+    {
+        "Division":  "Sales Office",
+        "Designation":  "Executive - Designer",
+        "EmployeeName":  "Chakali Jyothi",
+        "EmployeeCode":  "PRI1129",
+        "SlNo":  "1",
+        "DOJ":  "02-May-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Sales Office",
+        "Designation":  "Executive - Schemes",
+        "EmployeeName":  "Minnalapuram Kavitha",
+        "EmployeeCode":  "PRI1130",
+        "SlNo":  "2",
+        "DOJ":  "04-May-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Suprim",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "S Shiva Kumar",
+        "EmployeeCode":  "PRI1131",
+        "SlNo":  "3",
+        "DOJ":  "04-May-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Somashekhara S R",
+        "EmployeeCode":  "PRI1132",
+        "SlNo":  "4",
+        "DOJ":  "05-May-26",
+        "HQ":  "Mysuru"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "V Ramanjula Reddy",
+        "EmployeeCode":  "PRI1133",
+        "SlNo":  "5",
+        "DOJ":  "06-May-26",
+        "HQ":  "Kadapa"
+    },
+    {
+        "Division":  "Sales Office",
+        "Designation":  "Business Analyst",
+        "EmployeeName":  "Manideep Suri",
+        "EmployeeCode":  "PRI1134",
+        "SlNo":  "6",
+        "DOJ":  "06-May-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Distribution",
+        "Designation":  "Office Assistant",
+        "EmployeeName":  "Fathima Basidha KV",
+        "EmployeeCode":  "PRI1135",
+        "SlNo":  "7",
+        "DOJ":  "11-May-26",
+        "HQ":  "Calicut"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Abhishek A",
+        "EmployeeCode":  "PRI1136",
+        "SlNo":  "8",
+        "DOJ":  "11-May-26",
+        "HQ":  "Kochi"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Regional Business Manager",
+        "EmployeeName":  "Navneet Kumar",
+        "EmployeeCode":  "PRI1137",
+        "SlNo":  "9",
+        "DOJ":  "12-May-26",
+        "HQ":  "Ranchi"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Executive",
+        "EmployeeName":  "Rohit Kumar Mishra",
+        "EmployeeCode":  "PRI1138",
+        "SlNo":  "10",
+        "DOJ":  "12-May-26",
+        "HQ":  "Sasaram"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Area Business Manager",
+        "EmployeeName":  "Ujjawal Kumar",
+        "EmployeeCode":  "PRI1139",
+        "SlNo":  "11",
+        "DOJ":  "13-May-26",
+        "HQ":  "Gaya"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Executive",
+        "EmployeeName":  "Dipanjan Mukherjee",
+        "EmployeeCode":  "PRI1140",
+        "SlNo":  "12",
+        "DOJ":  "14-May-26",
+        "HQ":  "South Kolkata"
+    },
+    {
+        "Division":  "Distribution",
+        "Designation":  "Office Assistant",
+        "EmployeeName":  "Neethu P",
+        "EmployeeCode":  "PRI1141",
+        "SlNo":  "13",
+        "DOJ":  "18-May-26",
+        "HQ":  "Calicut"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Mandaloju Bramham",
+        "EmployeeCode":  "PRI1142",
+        "SlNo":  "14",
+        "DOJ":  "18-May-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Executive",
+        "EmployeeName":  "Gaurav Kumar",
+        "EmployeeCode":  "PRI1143",
+        "SlNo":  "15",
+        "DOJ":  "18-May-26",
+        "HQ":  "Gaya"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Annindla Sindhu",
+        "EmployeeCode":  "PRI1144",
+        "SlNo":  "16",
+        "DOJ":  "18-May-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Praveen R",
+        "EmployeeCode":  "PRI1145",
+        "SlNo":  "17",
+        "DOJ":  "19-May-26",
+        "HQ":  "Erode"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Executive",
+        "EmployeeName":  "Supriyo Sarkar",
+        "EmployeeCode":  "PRI1146",
+        "SlNo":  "18",
+        "DOJ":  "19-May-26",
+        "HQ":  "Jalpaiguri"
+    },
+    {
+        "Division":  "Sales Office",
+        "Designation":  "Front office Executive",
+        "EmployeeName":  "Kappera Divya Reddy",
+        "EmployeeCode":  "PRI1147",
+        "SlNo":  "1",
+        "DOJ":  "01-Jun-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Sales Office",
+        "Designation":  "Executive - Schemes",
+        "EmployeeName":  "Andem Mounika Reddy",
+        "EmployeeCode":  "PRI1148",
+        "SlNo":  "2",
+        "DOJ":  "01-Jun-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Sales Office",
+        "Designation":  "Executive - Schemes",
+        "EmployeeName":  "Andem Jhansi",
+        "EmployeeCode":  "PRI1149",
+        "SlNo":  "3",
+        "DOJ":  "01-Jun-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Executive",
+        "EmployeeName":  "Chinmoy Mukherjee",
+        "EmployeeCode":  "PRI1150",
+        "SlNo":  "4",
+        "DOJ":  "01-Jun-26",
+        "HQ":  "Burdwan"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Md Hassan Ansari",
+        "EmployeeCode":  "PRI1151",
+        "SlNo":  "5",
+        "DOJ":  "01-Jun-26",
+        "HQ":  "Ranchi"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Vishnu N",
+        "EmployeeCode":  "PRI1152",
+        "SlNo":  "6",
+        "DOJ":  "01-Jun-26",
+        "HQ":  "Perinthalmanna"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Vineet",
+        "EmployeeCode":  "PRI1153",
+        "SlNo":  "7",
+        "DOJ":  "02-Jun-26",
+        "HQ":  "Kanpur"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Vanga Vamshikrishna",
+        "EmployeeCode":  "PRI1154",
+        "SlNo":  "8",
+        "DOJ":  "03-Jun-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "G K Praveen Kumar",
+        "EmployeeCode":  "PRI1155",
+        "SlNo":  "9",
+        "DOJ":  "03-Jun-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Area Business Manager",
+        "EmployeeName":  "Murulinandan S",
+        "EmployeeCode":  "PRI1156",
+        "SlNo":  "10",
+        "DOJ":  "03-Jun-26",
+        "HQ":  "Bangalore"
+    },
+    {
+        "Division":  "Distribution",
+        "Designation":  "Assistant Manager",
+        "EmployeeName":  "Madhavi",
+        "EmployeeCode":  "PRI1157",
+        "SlNo":  "11",
+        "DOJ":  "05-Jun-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Sunkari Prasad",
+        "EmployeeCode":  "PRI1158",
+        "SlNo":  "12",
+        "DOJ":  "08-Jun-26",
+        "HQ":  "Visakhapatnam"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Gowri Shankar",
+        "EmployeeCode":  "PRI1159",
+        "SlNo":  "13",
+        "DOJ":  "09-Jun-26",
+        "HQ":  "Erode"
+    },
+    {
+        "Division":  "Corporate",
+        "Designation":  "Assistant - Human Resources",
+        "EmployeeName":  "Kalla Naga Navya",
+        "EmployeeCode":  "PRI1160",
+        "SlNo":  "14",
+        "DOJ":  "10-Jun-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Executive",
+        "EmployeeName":  "Nabangkur Dutta",
+        "EmployeeCode":  "PRI1161",
+        "SlNo":  "15",
+        "DOJ":  "11-Jun-26",
+        "HQ":  "Cooch Behar"
+    },
+    {
+        "Division":  "Suprim",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Manoj Pampatwar",
+        "EmployeeCode":  "PRI1162",
+        "SlNo":  "16",
+        "DOJ":  "16-Jun-26",
+        "HQ":  "Nanded"
+    },
+    {
+        "Division":  "Suprim",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Bathini Sridevi",
+        "EmployeeCode":  "PRI1163",
+        "SlNo":  "17",
+        "DOJ":  "17-Jun-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Dasari Bharath Kumar",
+        "EmployeeCode":  "PRI1164",
+        "SlNo":  "18",
+        "DOJ":  "17-Jun-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Suprim",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Chetan Madhukar Kakde",
+        "EmployeeCode":  "PRI1165",
+        "SlNo":  "19",
+        "DOJ":  "18-Jun-26",
+        "HQ":  "Aurangabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Area Business Manager",
+        "EmployeeName":  "Yeleswarapu Naga Saikrishna",
+        "EmployeeCode":  "PRI1166",
+        "SlNo":  "20",
+        "DOJ":  "18-Jun-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Ajay Kumar",
+        "EmployeeCode":  "PRI1167",
+        "SlNo":  "21",
+        "DOJ":  "19-Jun-26",
+        "HQ":  "Ranchi"
+    },
+    {
+        "Division":  "Sales Office",
+        "Designation":  "Office Assistant",
+        "EmployeeName":  "Mallesh Nandikanti",
+        "EmployeeCode":  "PRI1168",
+        "SlNo":  "22",
+        "DOJ":  "19-Jun-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Area Business Manager",
+        "EmployeeName":  "Arun Kumar",
+        "EmployeeCode":  "PRI1169",
+        "SlNo":  "1",
+        "DOJ":  "01-Jul-26",
+        "HQ":  "Ranchi"
+    },
+    {
+        "Division":  "Marketing",
+        "Designation":  "Senior Brand Manager",
+        "EmployeeName":  "Syed Kashfi Shaheen",
+        "EmployeeCode":  "PRI1170",
+        "SlNo":  "2",
+        "DOJ":  "01-Jul-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Suprim",
+        "Designation":  "Regional Business Manager",
+        "EmployeeName":  "Srivathsa R",
+        "EmployeeCode":  "PRI1171",
+        "SlNo":  "3",
+        "DOJ":  "01-Jul-26",
+        "HQ":  "Bangalore"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Nayini Anvesh",
+        "EmployeeCode":  "PRI1172",
+        "SlNo":  "4",
+        "DOJ":  "02-Jul-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Suprim",
+        "Designation":  "Area Business Manager",
+        "EmployeeName":  "Manjunath",
+        "EmployeeCode":  "PRI1173",
+        "SlNo":  "5",
+        "DOJ":  "02-Jul-26",
+        "HQ":  "Gulbarga"
+    },
+    {
+        "Division":  "Suprim",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Shaik Shafiq Ullah",
+        "EmployeeCode":  "PRI1174",
+        "SlNo":  "6",
+        "DOJ":  "03-Jul-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Suprim",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Basavaraj",
+        "EmployeeCode":  "PRI1175",
+        "SlNo":  "7",
+        "DOJ":  "06-Jul-26",
+        "HQ":  "Gulbarga"
+    },
+    {
+        "Division":  "Distribution",
+        "Designation":  "Packing Assistant",
+        "EmployeeName":  "Mamindla Raju",
+        "EmployeeCode":  "PRI1176",
+        "SlNo":  "8",
+        "DOJ":  "06-Jul-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Business Development Manager",
+        "EmployeeName":  "Rajathi S",
+        "EmployeeCode":  "PRI1177",
+        "SlNo":  "9",
+        "DOJ":  "07-Jul-26",
+        "HQ":  "Chennai"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Ravi Kant Arya",
+        "EmployeeCode":  "PRI1178",
+        "SlNo":  "10",
+        "DOJ":  "09-Jul-26",
+        "HQ":  "Ranchi"
+    },
+    {
+        "Division":  "Suprim",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Nallabelli Chiranjeeva",
+        "EmployeeCode":  "PRI1179",
+        "SlNo":  "11",
+        "DOJ":  "09-Jul-26",
+        "HQ":  "Nalgonda"
+    },
+    {
+        "Division":  "Suprim",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Prabhakar Laxmanrao Futane",
+        "EmployeeCode":  "PRI1180",
+        "SlNo":  "12",
+        "DOJ":  "09-Jul-26",
+        "HQ":  "Nagpur"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Duraimurugan E",
+        "EmployeeCode":  "PRI1181",
+        "SlNo":  "13",
+        "DOJ":  "09-Jul-26",
+        "HQ":  "Chennai"
+    },
+    {
+        "Division":  "Suprim",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Trushika Roshan Chandekar",
+        "EmployeeCode":  "PRI1182",
+        "SlNo":  "14",
+        "DOJ":  "10-Jul-26",
+        "HQ":  "Nagpur"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Kara Murugan M",
+        "EmployeeCode":  "PRI1183",
+        "SlNo":  "15",
+        "DOJ":  "13-Jul-26",
+        "HQ":  "Kumbakonam"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Territory Business Manager",
+        "EmployeeName":  "Pushpavalli",
+        "EmployeeCode":  "PRI1184",
+        "SlNo":  "16",
+        "DOJ":  "15-Jul-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Primus",
+        "Designation":  "Area Business Manager",
+        "EmployeeName":  "Suroju Shankara Chary",
+        "EmployeeCode":  "PRI1185",
+        "SlNo":  "17",
+        "DOJ":  "16-Jul-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Sales Office",
+        "Designation":  "Business Analyst",
+        "EmployeeName":  "Uppu Ravali",
+        "EmployeeCode":  "PRI1186",
+        "SlNo":  "18",
+        "DOJ":  "20-Jul-26",
+        "HQ":  "Hyderabad"
+    },
+    {
+        "Division":  "Sales Office",
+        "Designation":  "Executive - Administration",
+        "EmployeeName":  "Kondapalli Dinesh Sree Charan",
+        "EmployeeCode":  "PRI1187",
+        "SlNo":  "19",
+        "DOJ":  "20-Jul-26",
+        "HQ":  "Hyderabad"
+    }
+]

@@ -1,0 +1,3223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Primus HR Management Portal — Intelligence Dashboard</title>
+  <meta name="description" content="Enterprise HR Management Portal with BI Dashboard, Employee Directory, Analytics and Reporting">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="js/database.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/export_standalone.js"></script>
+</head>
+<body>
+  <div class="app-container" id="app">
+    <!-- SIDEBAR -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">P</div>
+        <div class="sidebar-brand">Primus HR<span>Management Portal</span></div>
+      </div>
+      <div class="sidebar-nav">
+        <div class="nav-section-label">Analytics</div>
+        <div class="nav-item active" data-page="overview" onclick="App.navigate('overview')">
+          <span class="nav-icon">📊</span> Executive Overview
+        </div>
+        
+        <div class="nav-section-label">People</div>
+        <div class="nav-item" data-page="employee-master" onclick="App.navigate('employee-master')">
+          <span class="nav-icon">👥</span> Employee Master
+        </div>
+        <div class="nav-item" data-page="directory" onclick="App.navigate('directory')">
+          <span class="nav-icon">📋</span> Employee Directory
+        </div>
+        <div class="nav-item" data-page="profile" onclick="App.navigate('profile')" style="display:none" id="nav-profile">
+          <span class="nav-icon">👤</span> Employee Profile
+        </div>
+        
+        <div class="nav-section-label">Lifecycle</div>
+        <div class="nav-item" data-page="recruitment" onclick="App.navigate('recruitment')">
+          <span class="nav-icon">🎯</span> Recruitment
+        </div>
+        <div class="nav-item" data-page="joining" onclick="App.navigate('joining')">
+          <span class="nav-icon">🤝</span> Joining & Onboarding
+        </div>
+        <div class="nav-item" data-page="probation" onclick="App.navigate('probation')">
+          <span class="nav-icon">⏳</span> Probation & Confirmation
+        </div>
+        <div class="nav-item" data-page="attrition" onclick="App.navigate('attrition')">
+          <span class="nav-icon">🚪</span> Attrition & Resignation
+        </div>
+        
+        <div class="nav-section-label">Operations</div>
+        <div class="nav-item" data-page="attendance" onclick="App.navigate('attendance')">
+          <span class="nav-icon">📅</span> Attendance
+        </div>
+        <div class="nav-item" data-page="leave" onclick="App.navigate('leave')">
+          <span class="nav-icon">🏖️</span> Leave Management
+        </div>
+        <div class="nav-item" data-page="payroll" onclick="App.navigate('payroll')">
+          <span class="nav-icon">💰</span> Payroll
+        </div>
+        
+        <div class="nav-section-label">Planning</div>
+        <div class="nav-item" data-page="headcount" onclick="App.navigate('headcount')">
+          <span class="nav-icon">📈</span> Historical Headcount
+        </div>
+        <div class="nav-item" data-page="data-entry" onclick="App.navigate('data-entry')">
+          <span class="nav-icon">✏️</span> Monthly Data Entry
+        </div>
+
+        <div class="nav-section-label">Reporting</div>
+        <div class="nav-item" data-page="reports" onclick="App.navigate('reports')">
+          <span class="nav-icon">📑</span> Reports & Export
+        </div>
+        <div class="nav-item" data-page="import" onclick="App.navigate('import')">
+          <span class="nav-icon">📥</span> Data Import
+        </div>
+        <div class="nav-item" data-page="settings" onclick="App.navigate('settings')">
+          <span class="nav-icon">⚙️</span> Master Data / Settings
+        </div>
+      </div>
+      
+      <div style="margin-top: auto; padding: 20px; border-top: 1px solid var(--border);">
+        <div class="nav-item" onclick="App.logout()">
+          <span class="nav-icon">🚪</span> Sign Out
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN AREA -->
+    <div class="main-area">
+      <!-- TOP HEADER -->
+      <header class="top-header">
+        <button class="header-btn" id="sidebarToggle" onclick="document.getElementById('sidebar').classList.toggle('open')" style="display:none">☰</button>
+        <div class="header-breadcrumb" id="headerBreadcrumb">Executive Overview</div>
+        <div class="header-search">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="globalSearch" placeholder="Search employees, departments, HQ..." oninput="App.globalSearch(this.value)">
+        </div>
+        <div class="header-actions">
+          <div class="header-snapshot" id="snapshotDate">Data as on: 20 Aug 2026</div>
+          <button class="header-btn" title="Refresh" onclick="App.refreshData()">🔄</button>
+          <button class="header-btn" title="Notifications">
+            🔔
+            <span class="badge-dot"></span>
+          </button>
+          <div class="header-user">
+            <div class="header-user-avatar">HR</div>
+            <div class="header-user-info">
+              <div class="name">HR Admin</div>
+              <div class="role">Administrator</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENT AREA -->
+      <div class="content-area" id="contentArea">
+        <!-- Pages are rendered dynamically here -->
+        <div class="loading-container" style="display:flex;align-items:center;justify-content:center;height:60vh;">
+          <div>
+            <div class="loading-spinner" style="width:40px;height:40px;margin:0 auto 16px;"></div>
+            <p style="text-align:center;color:var(--text-tertiary);">Initializing HR Portal...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONTAINER -->
+  <div class="modal-overlay" id="modalOverlay" onclick="App.closeModal(event)">
+    <div class="modal" id="modalContent" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">Modal</div>
+        <button class="modal-close" onclick="App.closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer" id="modalFooter"></div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- GLOBAL SEARCH RESULTS -->
+  <div id="searchResults" style="display:none;position:fixed;top:56px;left:50%;transform:translateX(-30%);background:var(--bg-secondary);border:1px solid var(--border-light);border-radius:var(--radius-lg);box-shadow:var(--shadow-xl);max-height:400px;overflow-y:auto;width:440px;z-index:500;"></div>
+
+<script>
+// ==========================================
+// HR PORTAL — MAIN APPLICATION
+// Complete HR Management System
+// ==========================================
+
+// Global state
+const State = {
+  currentPage: 'overview',
+  employees: [],
+  joining: [],
+  resignation: [],
+  confirmation: [],
+  attendance: [],
+  leave: [],
+  payroll: [],
+  recruitment: [],
+  headcount: [],
+  audit: [],
+  filters: {},
+  currentEmployee: null,
+  charts: {},
+  pageSize: 25,
+  currentPageNum: 1,
+  sortField: null,
+  sortDir: 'asc'
+};
+
+// ==========================================
+// APP CONTROLLER
+// ==========================================
+const App = {
+  logout() {
+    fetch('/api/auth/logout', { method: 'POST' })
+      .then(() => { window.location.href = '/login.html'; })
+      .catch(console.error);
+  },
+  async init() {
+    // Server-side auth ensures this page is only accessible if authenticated
+
+    try {
+      await db.init();
+      const empCount = await db.count(STORES.employees);
+      if (empCount === 0) {
+        await this.loadInitialData();
+      }
+      await this.loadAllData();
+      this.initMasterData();
+      this.navigate('overview');
+      this.showToast('HR Portal initialized successfully', 'success');
+    } catch(err) {
+      console.error('Init error:', err);
+      this.showToast('Error initializing portal: ' + err.message, 'error');
+    }
+  },
+
+  async loadInitialData() {
+    this.showToast('Loading Excel data...', 'info');
+    
+    // Load employees
+    try {
+      const empResp = await fetch('js/data_employees.json');
+      const empData = await empResp.json();
+      for (const emp of empData) {
+        emp.Department = emp.Division === 'Sales Office' || emp.Division === 'Corporate' || emp.Division === 'Distribution' || emp.Division === 'Marketing' ? emp.Division : 'Sales';
+        emp.Gender = '';
+        emp.DOB = '';
+        emp.Mobile = '';
+        emp.Email = '';
+        emp.Level = '';
+        emp.ReportingManager = '';
+        emp.EmployeeType = 'Full Time';
+        emp.EmploymentCategory = '';
+        emp.Remarks = '';
+        emp.CreatedAt = new Date().toISOString();
+        emp.UpdatedAt = new Date().toISOString();
+      }
+      await db.bulkPut(STORES.employees, empData);
+    } catch(e) { console.error('Error loading employees:', e); }
+    
+    // Load joining
+    try {
+      const joinResp = await fetch('js/data_joining.json');
+      const joinData = await joinResp.json();
+      for (const j of joinData) {
+        j.JoiningStatus = 'Completed';
+        j.Remarks = '';
+        j.Department = '';
+      }
+      await db.bulkPut(STORES.joining, joinData);
+    } catch(e) { console.error('Error loading joining:', e); }
+    
+    // Load resignation
+    try {
+      const resResp = await fetch('js/data_resignation.json');
+      const resData = await resResp.json();
+      for (const r of resData) {
+        r.ExitType = '';
+        r.ExitReason = '';
+        r.Remarks = '';
+        r.Department = '';
+      }
+      await db.bulkPut(STORES.resignation, resData);
+    } catch(e) { console.error('Error loading resignation:', e); }
+    
+    // Load confirmation
+    try {
+      const confResp = await fetch('js/data_confirmation.json');
+      const confData = await confResp.json();
+      for (const c of confData) {
+        c.ConfirmationStatus = 'Confirmed';
+        c.ProbationExtension = '';
+        c.ExtensionDays = '';
+        c.RevisedConfirmationDate = '';
+        c.Reason = '';
+        c.HRRemarks = '';
+      }
+      await db.bulkPut(STORES.confirmation, confData);
+    } catch(e) { console.error('Error loading confirmation:', e); }
+
+    await db.logAudit({
+      Module: 'System',
+      Action: 'Initial Data Load',
+      Record: 'All',
+      Field: '',
+      OldValue: '',
+      NewValue: 'Loaded from Excel source',
+      EmployeeCode: ''
+    });
+  },
+
+  async loadAllData() {
+    State.employees = await db.getAll(STORES.employees);
+    State.joining = await db.getAll(STORES.joining);
+    State.resignation = await db.getAll(STORES.resignation);
+    State.confirmation = await db.getAll(STORES.confirmation);
+    State.attendance = await db.getAll(STORES.attendance);
+    State.leave = await db.getAll(STORES.leave);
+    State.payroll = await db.getAll(STORES.payroll);
+    State.recruitment = await db.getAll(STORES.recruitment);
+    State.headcount = await db.getAll(STORES.headcount);
+    State.audit = await db.getAll(STORES.audit);
+  },
+
+  async initMasterData() {
+    const existing = await db.get(STORES.masterData, 'departments');
+    if (existing) return;
+    
+    const divisions = [...new Set(State.employees.map(e => e.Division).filter(Boolean))].sort();
+    const hqs = [...new Set(State.employees.map(e => e.HQ).filter(Boolean))].sort();
+    const designations = [...new Set(State.employees.map(e => e.Designation).filter(Boolean))].sort();
+    const statuses = [...new Set(State.employees.map(e => e.EmploymentStatus).filter(Boolean))].sort();
+    const departments = [...new Set(State.employees.map(e => e.Department).filter(Boolean))].sort();
+
+    await db.put(STORES.masterData, { category: 'departments', values: departments });
+    await db.put(STORES.masterData, { category: 'divisions', values: divisions });
+    await db.put(STORES.masterData, { category: 'hqs', values: hqs });
+    await db.put(STORES.masterData, { category: 'designations', values: designations });
+    await db.put(STORES.masterData, { category: 'statuses', values: statuses });
+    await db.put(STORES.masterData, { category: 'levels', values: ['L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7'] });
+    await db.put(STORES.masterData, { category: 'leaveTypes', values: ['CL', 'SL', 'EL', 'LOP', 'C-Off'] });
+    await db.put(STORES.masterData, { category: 'exitTypes', values: ['Voluntary', 'Involuntary', 'Termination', 'Retirement', 'Absconding'] });
+    await db.put(STORES.masterData, { category: 'exitReasons', values: ['Better Opportunity', 'Personal Reasons', 'Relocation', 'Health Issues', 'Performance', 'Compensation', 'Other'] });
+    await db.put(STORES.masterData, { category: 'confirmationStatuses', values: ['Confirmed', 'Pending', 'Extended', 'Overdue'] });
+    await db.put(STORES.masterData, { category: 'recruitmentStatuses', values: ['Open', 'In Progress', 'Filled', 'On Hold', 'Cancelled'] });
+    await db.put(STORES.masterData, { category: 'employeeTypes', values: ['Full Time', 'Contract', 'Part Time', 'Trainee', 'Intern'] });
+  },
+
+  navigate(page, data) {
+    State.currentPage = page;
+    State.currentPageNum = 1;
+    
+    // Update nav items
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.page === page);
+    });
+    
+    // Update breadcrumb
+    const pageNames = {
+      'overview': 'Executive Overview',
+      'employee-master': 'Employee Master',
+      'directory': 'Employee Directory',
+      'profile': 'Employee Profile',
+      'recruitment': 'Recruitment',
+      'joining': 'Joining & Onboarding',
+      'attendance': 'Attendance',
+      'leave': 'Leave Management',
+      'probation': 'Probation & Confirmation',
+      'attrition': 'Attrition & Resignation',
+      'payroll': 'Payroll',
+      'headcount': 'Historical Headcount',
+      'data-entry': 'Monthly HR Data Entry',
+      'reports': 'Reports & Excel Export',
+      'import': 'Data Import',
+      'settings': 'Master Data / Settings'
+    };
+    document.getElementById('headerBreadcrumb').textContent = pageNames[page] || page;
+    
+    if (page === 'profile' && data) {
+      State.currentEmployee = data;
+      document.getElementById('nav-profile').style.display = '';
+    }
+    
+    // Render page
+    const renderers = {
+      'overview': () => Pages.renderOverview(),
+      'employee-master': () => Pages.renderEmployeeMaster(),
+      'directory': () => Pages.renderDirectory(),
+      'profile': () => Pages.renderProfile(),
+      'joining': () => Pages.renderJoining(),
+      'attrition': () => Pages.renderAttrition(),
+      'probation': () => Pages.renderProbation(),
+      'recruitment': () => Pages.renderRecruitment(),
+      'attendance': () => Pages.renderAttendance(),
+      'leave': () => Pages.renderLeave(),
+      'payroll': () => Pages.renderPayroll(),
+      'headcount': () => Pages.renderHeadcount(),
+      'data-entry': () => Pages.renderDataEntry(),
+      'reports': () => Pages.renderReports(),
+      'import': () => Pages.renderImport(),
+      'settings': () => Pages.renderSettings()
+    };
+
+    // Destroy existing charts
+    Object.values(State.charts).forEach(c => { if (c && c.destroy) c.destroy(); });
+    State.charts = {};
+
+    if (renderers[page]) renderers[page]();
+    
+    // Scroll to top
+    document.getElementById('contentArea').scrollTop = 0;
+  },
+
+  async refreshData() {
+    await this.loadAllData();
+    this.navigate(State.currentPage);
+    this.showToast('Data refreshed', 'success');
+  },
+
+  getFilteredEmployees() {
+    let emps = [...State.employees];
+    const f = State.filters;
+    
+    if (f.division) emps = emps.filter(e => e.Division === f.division);
+    if (f.hq) emps = emps.filter(e => e.HQ === f.hq);
+    if (f.designation) emps = emps.filter(e => e.Designation === f.designation);
+    if (f.status) emps = emps.filter(e => e.EmploymentStatus === f.status);
+    if (f.department) emps = emps.filter(e => e.Department === f.department);
+    if (f.month) emps = emps.filter(e => e.DOJ && e.DOJ.split('-')[1] === f.month);
+    if (f.year) emps = emps.filter(e => e.DOJ && e.DOJ.split('-')[0] === f.year);
+    if (f.search) {
+      const s = f.search.toLowerCase();
+      emps = emps.filter(e => 
+        (e.EmployeeCode || '').toLowerCase().includes(s) ||
+        (e.EmployeeName || '').toLowerCase().includes(s) ||
+        (e.Designation || '').toLowerCase().includes(s) ||
+        (e.Division || '').toLowerCase().includes(s) ||
+        (e.HQ || '').toLowerCase().includes(s)
+      );
+    }
+    
+    return emps;
+  },
+
+  getActiveEmployees() {
+    return State.employees.filter(e => 
+      e.EmploymentStatus !== 'Resigned' && e.EmploymentStatus !== 'Terminated'
+    );
+  },
+
+  setFilter(key, value) {
+    if (value) State.filters[key] = value;
+    else delete State.filters[key];
+    this.navigate(State.currentPage);
+  },
+
+  clearFilters() {
+    State.filters = {};
+    this.navigate(State.currentPage);
+  },
+
+  globalSearch(query) {
+    const resultsEl = document.getElementById('searchResults');
+    if (!query || query.length < 2) {
+      resultsEl.style.display = 'none';
+      return;
+    }
+    
+    const s = query.toLowerCase();
+    const matches = State.employees.filter(e =>
+      (e.EmployeeCode || '').toLowerCase().includes(s) ||
+      (e.EmployeeName || '').toLowerCase().includes(s) ||
+      (e.Designation || '').toLowerCase().includes(s)
+    ).slice(0, 10);
+    
+    if (matches.length === 0) {
+      resultsEl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-tertiary);font-size:13px;">No results found</div>';
+    } else {
+      resultsEl.innerHTML = matches.map(e => `
+        <div style="padding:10px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid var(--border-light);" 
+             onmouseover="this.style.background='var(--bg-tertiary)'" 
+             onmouseout="this.style.background=''" 
+             onclick="App.openProfile('${e.EmployeeCode}');document.getElementById('searchResults').style.display='none';document.getElementById('globalSearch').value='';">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--brand-primary);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">${Utils.getInitials(e.EmployeeName)}</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;">${Utils.escapeHtml(e.EmployeeName)}</div>
+            <div style="font-size:11px;color:var(--text-tertiary);">${e.EmployeeCode} · ${e.Designation || ''} · ${e.Division || ''}</div>
+          </div>
+          <span class="status-badge ${Utils.getStatusClass(e.EmploymentStatus)}" style="margin-left:auto;">${e.EmploymentStatus}</span>
+        </div>
+      `).join('');
+    }
+    resultsEl.style.display = 'block';
+  },
+
+  openProfile(empCode) {
+    const emp = State.employees.find(e => e.EmployeeCode === empCode);
+    if (emp) this.navigate('profile', emp);
+  },
+
+  showModal(title, bodyHtml, footerHtml, wide) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalBody').innerHTML = bodyHtml;
+    document.getElementById('modalFooter').innerHTML = footerHtml || '';
+    document.getElementById('modalContent').className = wide ? 'modal wide' : 'modal';
+    document.getElementById('modalOverlay').classList.add('active');
+  },
+
+  closeModal(event) {
+    if (event && event.target !== document.getElementById('modalOverlay')) return;
+    document.getElementById('modalOverlay').classList.remove('active');
+  },
+
+  showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+      <span>${{success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'}[type] || 'ℹ️'}</span>
+      <span>${message}</span>
+      <button onclick="this.parentElement.remove()" style="margin-left:auto;color:var(--text-tertiary);font-size:16px;">✕</button>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+  },
+
+  showConfirmDialog(message, onConfirm) {
+    this.showModal('Confirm Action', `
+      <div class="text-center">
+        <div class="confirm-icon warning">⚠️</div>
+        <p style="font-size:14px;color:var(--text-secondary);">${message}</p>
+      </div>
+    `, `
+      <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="(${onConfirm.toString()})();App.closeModal();">Confirm</button>
+    `);
+  },
+
+  renderFilterBar(containerId) {
+    const divisions = [...new Set(State.employees.map(e => e.Division).filter(Boolean))].sort();
+    const hqs = [...new Set(State.employees.map(e => e.HQ).filter(Boolean))].sort();
+    const designations = [...new Set(State.employees.map(e => e.Designation).filter(Boolean))].sort();
+    const statuses = [...new Set(State.employees.map(e => e.EmploymentStatus).filter(Boolean))].sort();
+    const f = State.filters;
+    
+    return `
+      <div class="filter-bar">
+        <div class="filter-bar-header">
+          <div class="filter-bar-title">🔍 Filters</div>
+          <div class="filter-bar-actions">
+            <button class="btn btn-xs btn-ghost" onclick="App.clearFilters()">Clear All</button>
+          </div>
+        </div>
+        <div class="filter-grid">
+          <div class="filter-group">
+            <label>Division</label>
+            <select onchange="App.setFilter('division', this.value)">
+              <option value="">All Divisions</option>
+              ${divisions.map(d => `<option value="${d}" ${f.division===d?'selected':''}>${d}</option>`).join('')}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>HQ / Location</label>
+            <select onchange="App.setFilter('hq', this.value)">
+              <option value="">All HQs</option>
+              ${hqs.map(h => `<option value="${h}" ${f.hq===h?'selected':''}>${h}</option>`).join('')}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Designation</label>
+            <select onchange="App.setFilter('designation', this.value)">
+              <option value="">All Designations</option>
+              ${designations.map(d => `<option value="${d}" ${f.designation===d?'selected':''}>${d}</option>`).join('')}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Status</label>
+            <select onchange="App.setFilter('status', this.value)">
+              <option value="">All Statuses</option>
+              ${statuses.map(s => `<option value="${s}" ${f.status===s?'selected':''}>${s}</option>`).join('')}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Month</label>
+            <select onchange="App.setFilter('month', this.value)">
+              <option value="">All Months</option>
+              <option value="01" ${f.month==='01'?'selected':''}>Jan</option>
+              <option value="02" ${f.month==='02'?'selected':''}>Feb</option>
+              <option value="03" ${f.month==='03'?'selected':''}>Mar</option>
+              <option value="04" ${f.month==='04'?'selected':''}>Apr</option>
+              <option value="05" ${f.month==='05'?'selected':''}>May</option>
+              <option value="06" ${f.month==='06'?'selected':''}>Jun</option>
+              <option value="07" ${f.month==='07'?'selected':''}>Jul</option>
+              <option value="08" ${f.month==='08'?'selected':''}>Aug</option>
+              <option value="09" ${f.month==='09'?'selected':''}>Sep</option>
+              <option value="10" ${f.month==='10'?'selected':''}>Oct</option>
+              <option value="11" ${f.month==='11'?'selected':''}>Nov</option>
+              <option value="12" ${f.month==='12'?'selected':''}>Dec</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Year</label>
+            <select onchange="App.setFilter('year', this.value)">
+              <option value="">All Years</option>
+              <option value="2023" ${f.year==='2023'?'selected':''}>2023</option>
+              <option value="2024" ${f.year==='2024'?'selected':''}>2024</option>
+              <option value="2025" ${f.year==='2025'?'selected':''}>2025</option>
+              <option value="2026" ${f.year==='2026'?'selected':''}>2026</option>
+              <option value="2027" ${f.year==='2027'?'selected':''}>2027</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Search</label>
+            <input type="text" placeholder="Search..." value="${f.search||''}" oninput="App.setFilter('search', this.value)">
+          </div>
+        </div>
+        ${Object.keys(f).length > 0 ? `
+          <div class="active-filters">
+            ${Object.entries(f).map(([k,v]) => `
+              <span class="filter-tag">${k}: ${v} <span class="remove-filter" onclick="App.setFilter('${k}',null)">✕</span></span>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  },
+
+  renderPagination(totalItems, containerId) {
+    const totalPages = Math.ceil(totalItems / State.pageSize);
+    if (totalPages <= 1) return '';
+    
+    const current = State.currentPageNum;
+    let pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= current - 2 && i <= current + 2)) {
+        pages.push(i);
+      } else if (pages[pages.length-1] !== '...') {
+        pages.push('...');
+      }
+    }
+    
+    return `
+      <div class="table-footer">
+        <span>Showing ${((current-1)*State.pageSize)+1}–${Math.min(current*State.pageSize, totalItems)} of ${totalItems}</span>
+        <div class="pagination">
+          <button class="page-btn" ${current===1?'disabled':''} onclick="State.currentPageNum=${current-1};App.navigate(State.currentPage)">◀</button>
+          ${pages.map(p => p === '...' ? '<span style="padding:0 4px;">...</span>' : `
+            <button class="page-btn ${p===current?'active':''}" onclick="State.currentPageNum=${p};App.navigate(State.currentPage)">${p}</button>
+          `).join('')}
+          <button class="page-btn" ${current===totalPages?'disabled':''} onclick="State.currentPageNum=${current+1};App.navigate(State.currentPage)">▶</button>
+        </div>
+      </div>
+    `;
+  },
+
+  createChart(canvasId, config) {
+    setTimeout(() => {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      if (State.charts[canvasId]) State.charts[canvasId].destroy();
+      
+      config.options = config.options || {};
+      config.options.responsive = true;
+      config.options.maintainAspectRatio = false;
+      config.options.plugins = config.options.plugins || {};
+      config.options.plugins.legend = config.options.plugins.legend || { position: 'bottom', labels: { font: { size: 11, family: 'Inter' }, padding: 12, usePointStyle: true, pointStyle: 'circle' } };
+      
+      if (config.type === 'bar' || config.type === 'line') {
+        config.options.scales = config.options.scales || {};
+        config.options.scales.x = config.options.scales.x || { ticks: { font: { size: 10, family: 'Inter' } }, grid: { display: false } };
+        config.options.scales.y = config.options.scales.y || { ticks: { font: { size: 10, family: 'Inter' } }, grid: { color: '#f0f0f0' }, beginAtZero: true };
+      }
+      
+      State.charts[canvasId] = new Chart(canvas, config);
+    }, 50);
+  }
+};
+
+// ==========================================
+// PAGE RENDERERS
+// ==========================================
+const Pages = {
+
+  // ========== EXECUTIVE OVERVIEW ==========
+  renderOverview() {
+    const emps = App.getFilteredEmployees();
+    const active = emps.filter(e => e.EmploymentStatus !== 'Resigned' && e.EmploymentStatus !== 'Terminated');
+    const resigned = emps.filter(e => e.EmploymentStatus === 'Resigned');
+    const probation = emps.filter(e => e.EmploymentStatus === 'Probation');
+    const confirmed = emps.filter(e => e.EmploymentStatus === 'Confirmed');
+    const promoted = emps.filter(e => e.EmploymentStatus === 'Promoted');
+    
+    const totalJoining = State.joining.length;
+    const totalResignation = State.resignation.length;
+    const confirmationsCount = State.confirmation.length;
+    
+    // Division counts
+    const divCounts = Utils.countBy(active, 'Division');
+    const hqCounts = Utils.countBy(active, 'HQ');
+    const desCounts = Utils.countBy(active, 'Designation');
+    const statusCounts = Utils.countBy(emps, 'EmploymentStatus');
+    
+    // Tenure distribution
+    const tenureBrackets = {};
+    active.forEach(e => {
+      const b = Utils.getTenureBracket(e.DOJ);
+      tenureBrackets[b] = (tenureBrackets[b] || 0) + 1;
+    });
+    
+    // Monthly joining from data
+    const joiningByMonth = {};
+    State.joining.forEach(j => {
+      const mk = Utils.getMonthKey(j.DOJ);
+      if (mk) joiningByMonth[mk] = (joiningByMonth[mk] || 0) + 1;
+    });
+    
+    // Monthly exits
+    const exitsByMonth = {};
+    State.resignation.forEach(r => {
+      const mk = Utils.getMonthKey(r.LWD);
+      if (mk) exitsByMonth[mk] = (exitsByMonth[mk] || 0) + 1;
+    });
+    
+    // Exits by division
+    const exitsByDiv = Utils.countBy(State.resignation, 'Division');
+    const exitsByHQ = Utils.countBy(State.resignation, 'HQ');
+
+    // Attrition rate
+    const attritionRate = active.length > 0 ? (totalResignation / (active.length + totalResignation) * 100) : 0;
+    
+    // Confirmation analysis
+    const pendingConf = probation.length;
+    
+    // Data completeness
+    const dataStatus = {
+      'Employee Master': { status: 'Available', pct: 82 },
+      'Joining': { status: 'Available', pct: 100 },
+      'Resignation': { status: 'Available', pct: 100 },
+      'Confirmation': { status: 'Available', pct: 100 },
+      'Attendance': { status: 'Awaiting HR Data', pct: 0 },
+      'Leave': { status: 'Awaiting HR Data', pct: 0 },
+      'Payroll': { status: 'Awaiting HR Data', pct: 0 },
+      'Recruitment': { status: 'Awaiting HR Data', pct: 0 },
+      'Historical Headcount': { status: 'Awaiting HR Data', pct: 0 }
+    };
+
+    const content = document.getElementById('contentArea');
+    content.innerHTML = `
+      <div style="display:flex; justify-content: flex-end; margin-bottom: 15px;">
+        <button class="btn btn-primary" onclick="StandaloneExport.download()" style="display:flex;align-items:center;gap:8px;">
+          <span>📥</span> Download Interactive Report
+        </button>
+      </div>
+      ${App.renderFilterBar()}
+      
+      <!-- KPI CARDS -->
+      <div class="kpi-grid">
+        <div class="kpi-card accent-blue" onclick="App.navigate('directory')">
+          <div class="kpi-icon blue">👥</div>
+          <div class="kpi-label">Total Headcount</div>
+          <div class="kpi-value">${active.length}</div>
+          <div class="kpi-change neutral">All active employees</div>
+        </div>
+        <div class="kpi-card accent-green" onclick="App.navigate('joining')">
+          <div class="kpi-icon green">🤝</div>
+          <div class="kpi-label">New Hires (Apr–Aug '26)</div>
+          <div class="kpi-value">${totalJoining}</div>
+          <div class="kpi-change positive">From joining records</div>
+        </div>
+        <div class="kpi-card accent-red" onclick="App.navigate('attrition')">
+          <div class="kpi-icon red">🚪</div>
+          <div class="kpi-label">Exits (Apr–Aug '26)</div>
+          <div class="kpi-value">${totalResignation}</div>
+          <div class="kpi-change negative">${Utils.formatPercent(attritionRate)} attrition</div>
+        </div>
+        <div class="kpi-card accent-orange" onclick="App.navigate('probation')">
+          <div class="kpi-icon orange">⏳</div>
+          <div class="kpi-label">Pending Confirmations</div>
+          <div class="kpi-value">${pendingConf}</div>
+          <div class="kpi-change neutral">On probation</div>
+        </div>
+        <div class="kpi-card accent-purple" onclick="App.navigate('probation')">
+          <div class="kpi-icon purple">✅</div>
+          <div class="kpi-label">Confirmations</div>
+          <div class="kpi-value">${confirmationsCount}</div>
+          <div class="kpi-change neutral">Confirmed this period</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon blue">🎯</div>
+          <div class="kpi-label">Open Positions</div>
+          <div class="kpi-value awaiting">Awaiting HR Data</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon blue">📅</div>
+          <div class="kpi-label">Attendance %</div>
+          <div class="kpi-value awaiting">Awaiting HR Data</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon blue">💰</div>
+          <div class="kpi-label">Total Payroll</div>
+          <div class="kpi-value awaiting">Awaiting HR Data</div>
+        </div>
+      </div>
+
+      <!-- WORKFORCE MOVEMENT -->
+      <div class="section-header">
+        <div class="section-title"><span class="section-icon">📈</span> Workforce Movement</div>
+      </div>
+      <div class="dashboard-grid cols-2" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Monthly Hires & Exits</div></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartHiresExits"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Headcount by Employment Status</div></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartStatus"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- HEADCOUNT ANALYSIS -->
+      <div class="section-header">
+        <div class="section-title"><span class="section-icon">📊</span> Headcount Analysis</div>
+        <span class="section-badge">${active.length} Active</span>
+      </div>
+      <div class="dashboard-grid cols-3" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">By Division</div></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartDivision"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Top 10 HQs</div></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartHQ"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Top 10 Designations</div></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartDesignation"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- PEOPLE & TENURE -->
+      <div class="section-header">
+        <div class="section-title"><span class="section-icon">👤</span> People & Tenure</div>
+      </div>
+      <div class="dashboard-grid cols-2" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Employee Tenure Distribution</div></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartTenure"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Gender Distribution</div></div>
+          <div class="card-body">
+            <div class="empty-state">
+              <div class="empty-state-icon">👥</div>
+              <div class="empty-state-title">Gender Data Not Available</div>
+              <div class="empty-state-text">Gender information has not been provided in the source data. Update employee records to see gender analytics.</div>
+              <button class="btn btn-sm btn-outline" onclick="App.navigate('employee-master')">Update Employee Records</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ATTRITION -->
+      <div class="section-header">
+        <div class="section-title"><span class="section-icon">🚪</span> Attrition Analysis</div>
+        <span class="section-badge">${totalResignation} Exits</span>
+      </div>
+      <div class="dashboard-grid cols-2" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Exits by Division</div></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartExitDiv"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Exits by Top HQs</div></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartExitHQ"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- CONFIRMATION & LIFECYCLE -->
+      <div class="section-header">
+        <div class="section-title"><span class="section-icon">⏳</span> Confirmation & Probation</div>
+      </div>
+      <div class="dashboard-grid cols-2" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Confirmation Activity</div></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartConfirmation"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Probation Status</div></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:10px 0;">
+              <div style="text-align:center;padding:16px;background:var(--success-bg);border-radius:var(--radius-md);">
+                <div style="font-size:28px;font-weight:700;color:var(--success);">${confirmed.length}</div>
+                <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px;">Confirmed</div>
+              </div>
+              <div style="text-align:center;padding:16px;background:var(--warning-bg);border-radius:var(--radius-md);">
+                <div style="font-size:28px;font-weight:700;color:var(--warning);">${probation.length}</div>
+                <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px;">On Probation</div>
+              </div>
+              <div style="text-align:center;padding:16px;background:var(--brand-primary-bg);border-radius:var(--radius-md);">
+                <div style="font-size:28px;font-weight:700;color:var(--brand-primary);">${promoted.length}</div>
+                <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px;">Promoted</div>
+              </div>
+              <div style="text-align:center;padding:16px;background:var(--purple-bg);border-radius:var(--radius-md);">
+                <div style="font-size:28px;font-weight:700;color:var(--purple);">${confirmationsCount}</div>
+                <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px;">Confirmed This Period</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AWAITING DATA SECTIONS -->
+      <div class="section-header">
+        <div class="section-title"><span class="section-icon">📅</span> Attendance & Leave</div>
+      </div>
+      <div class="dashboard-grid cols-2" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Attendance Summary</div></div>
+          <div class="card-body">
+            <div class="empty-state">
+              <div class="empty-state-icon">📅</div>
+              <div class="empty-state-title">Attendance Data Not Yet Entered</div>
+              <div class="empty-state-text">Monthly attendance data has not been provided. Enter attendance records to see analytics.</div>
+              <button class="btn btn-sm btn-primary" onclick="App.navigate('attendance')">Enter Attendance Data</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Leave Summary</div></div>
+          <div class="card-body">
+            <div class="empty-state">
+              <div class="empty-state-icon">🏖️</div>
+              <div class="empty-state-title">Leave Data Not Yet Entered</div>
+              <div class="empty-state-text">Monthly leave data has not been provided. Enter leave records to see analytics.</div>
+              <button class="btn btn-sm btn-primary" onclick="App.navigate('leave')">Enter Leave Data</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div class="section-title"><span class="section-icon">💰</span> Payroll & Recruitment</div>
+      </div>
+      <div class="dashboard-grid cols-2" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Payroll Summary</div></div>
+          <div class="card-body">
+            <div class="empty-state">
+              <div class="empty-state-icon">💰</div>
+              <div class="empty-state-title">Payroll Data Not Yet Provided</div>
+              <div class="empty-state-text">Monthly payroll data has not been entered. Provide payroll records to see analytics.</div>
+              <button class="btn btn-sm btn-primary" onclick="App.navigate('payroll')">Enter Payroll Data</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Recruitment Pipeline</div></div>
+          <div class="card-body">
+            <div class="empty-state">
+              <div class="empty-state-icon">🎯</div>
+              <div class="empty-state-title">Awaiting Recruitment Data</div>
+              <div class="empty-state-text">Recruitment pipeline data has not been entered. Add recruitment records to see hiring analytics.</div>
+              <button class="btn btn-sm btn-primary" onclick="App.navigate('recruitment')">Enter Recruitment Data</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DATA HEALTH -->
+      <div class="section-header">
+        <div class="section-title"><span class="section-icon">📋</span> Data Health & Completeness</div>
+      </div>
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-body">
+          <div class="health-grid">
+            ${Object.entries(dataStatus).map(([name, info]) => `
+              <div class="health-item">
+                <div class="health-item-name">${name}</div>
+                <div class="health-bar"><div class="health-bar-fill ${info.pct > 70 ? 'green' : info.pct > 30 ? 'orange' : info.pct > 0 ? 'red' : 'gray'}" style="width:${info.pct}%"></div></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <span class="health-percent">${info.pct}% complete</span>
+                  <span class="status-badge ${info.status === 'Available' ? 'available' : 'awaiting'}">${info.status}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- MANAGEMENT INSIGHTS -->
+      <div class="section-header">
+        <div class="section-title"><span class="section-icon">💡</span> Management Insights</div>
+      </div>
+      <div style="margin-bottom:20px;">
+        ${this.generateInsights(active, State.resignation, divCounts, hqCounts, probation)}
+      </div>
+    `;
+
+    // Render charts
+    this.renderOverviewCharts(divCounts, hqCounts, desCounts, statusCounts, tenureBrackets, joiningByMonth, exitsByMonth, exitsByDiv, exitsByHQ);
+  },
+
+  generateInsights(active, resignations, divCounts, hqCounts, probation) {
+    const insights = [];
+    
+    // Top division
+    const topDiv = Object.entries(divCounts).sort((a,b) => b[1]-a[1]);
+    if (topDiv.length > 0) {
+      insights.push(`Headcount is highest in <strong>${topDiv[0][0]}</strong> division with ${topDiv[0][1]} employees (${Utils.formatPercent(topDiv[0][1]/active.length*100)} of active workforce).`);
+    }
+    
+    // Top HQ
+    const topHQ = Object.entries(hqCounts).sort((a,b) => b[1]-a[1]);
+    if (topHQ.length > 0) {
+      insights.push(`Most employees are located in <strong>${topHQ[0][0]}</strong> HQ with ${topHQ[0][1]} employees.`);
+    }
+    
+    // Resignations
+    if (resignations.length > 0) {
+      const exitDiv = Utils.countBy(resignations, 'Division');
+      const topExitDiv = Object.entries(exitDiv).sort((a,b) => b[1]-a[1]);
+      insights.push(`${resignations.length} resignations occurred during the current period. Highest exits are concentrated in <strong>${topExitDiv[0][0]}</strong> division (${topExitDiv[0][1]} exits).`);
+    }
+    
+    // Probation
+    if (probation.length > 0) {
+      insights.push(`<strong>${probation.length}</strong> employees are currently on probation and approaching confirmation.`);
+    }
+
+    // Tenure insight
+    const longTenure = active.filter(e => Utils.calculateTenure(e.DOJ).totalMonths >= 60);
+    if (longTenure.length > 0) {
+      insights.push(`<strong>${longTenure.length}</strong> employees have served 5+ years, representing ${Utils.formatPercent(longTenure.length/active.length*100)} of the active workforce.`);
+    }
+    
+    return insights.map(i => `
+      <div class="insight-card">
+        <span class="insight-icon">💡</span>
+        <span>${i}</span>
+      </div>
+    `).join('');
+  },
+
+  renderOverviewCharts(divCounts, hqCounts, desCounts, statusCounts, tenureBrackets, joiningByMonth, exitsByMonth, exitsByDiv, exitsByHQ) {
+    // Hires vs Exits
+    const allMonths = [...new Set([...Object.keys(joiningByMonth), ...Object.keys(exitsByMonth)])].sort();
+    App.createChart('chartHiresExits', {
+      type: 'bar',
+      data: {
+        labels: allMonths.map(m => { const [y,mo] = m.split('-'); return ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+mo] + ' ' + y; }),
+        datasets: [
+          { label: 'Hires', data: allMonths.map(m => joiningByMonth[m]||0), backgroundColor: '#10b981', borderRadius: 4 },
+          { label: 'Exits', data: allMonths.map(m => exitsByMonth[m]||0), backgroundColor: '#ef4444', borderRadius: 4 }
+        ]
+      }
+    });
+
+    // Status pie
+    App.createChart('chartStatus', {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(statusCounts),
+        datasets: [{ data: Object.values(statusCounts), backgroundColor: Utils.chartColors.slice(0, Object.keys(statusCounts).length), borderWidth: 0 }]
+      },
+      options: { cutout: '55%' }
+    });
+
+    // Division
+    const sortedDiv = Utils.sortObjByValue(divCounts);
+    App.createChart('chartDivision', {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(sortedDiv),
+        datasets: [{ data: Object.values(sortedDiv), backgroundColor: Utils.chartColors, borderWidth: 0 }]
+      },
+      options: { cutout: '50%' }
+    });
+
+    // Top 10 HQs
+    const topHQ = Utils.topN(hqCounts, 10);
+    App.createChart('chartHQ', {
+      type: 'bar',
+      data: {
+        labels: Object.keys(topHQ),
+        datasets: [{ label: 'Employees', data: Object.values(topHQ), backgroundColor: '#3b82f6', borderRadius: 4 }]
+      },
+      options: { indexAxis: 'y', plugins: { legend: { display: false } } }
+    });
+
+    // Top 10 Designations
+    const topDes = Utils.topN(desCounts, 10);
+    App.createChart('chartDesignation', {
+      type: 'bar',
+      data: {
+        labels: Object.keys(topDes).map(d => d.length > 25 ? d.substring(0,22)+'...' : d),
+        datasets: [{ label: 'Employees', data: Object.values(topDes), backgroundColor: '#8b5cf6', borderRadius: 4 }]
+      },
+      options: { indexAxis: 'y', plugins: { legend: { display: false } } }
+    });
+
+    // Tenure
+    const tenureOrder = ['< 6 months', '6-12 months', '1-2 years', '2-3 years', '3-5 years', '5+ years'];
+    App.createChart('chartTenure', {
+      type: 'bar',
+      data: {
+        labels: tenureOrder,
+        datasets: [{ label: 'Employees', data: tenureOrder.map(t => tenureBrackets[t]||0), backgroundColor: ['#ef4444','#f59e0b','#10b981','#3b82f6','#8b5cf6','#06b6d4'], borderRadius: 4 }]
+      },
+      options: { plugins: { legend: { display: false } } }
+    });
+
+    // Exit by Division
+    App.createChart('chartExitDiv', {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(exitsByDiv),
+        datasets: [{ data: Object.values(exitsByDiv), backgroundColor: Utils.chartColors, borderWidth: 0 }]
+      },
+      options: { cutout: '50%' }
+    });
+
+    // Exit by HQ
+    const topExitHQ = Utils.topN(exitsByHQ, 10);
+    App.createChart('chartExitHQ', {
+      type: 'bar',
+      data: {
+        labels: Object.keys(topExitHQ),
+        datasets: [{ label: 'Exits', data: Object.values(topExitHQ), backgroundColor: '#ef4444', borderRadius: 4 }]
+      },
+      options: { indexAxis: 'y', plugins: { legend: { display: false } } }
+    });
+
+    // Confirmation by month
+    const confByMonth = {};
+    State.confirmation.forEach(c => {
+      const mk = Utils.getMonthKey(c.ConfirmationDate);
+      if (mk) confByMonth[mk] = (confByMonth[mk] || 0) + 1;
+    });
+    const confMonths = Object.keys(confByMonth).sort();
+    App.createChart('chartConfirmation', {
+      type: 'bar',
+      data: {
+        labels: confMonths.map(m => { const [y,mo] = m.split('-'); return ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+mo] + ' ' + y; }),
+        datasets: [{ label: 'Confirmations', data: confMonths.map(m => confByMonth[m]||0), backgroundColor: '#10b981', borderRadius: 4 }]
+      },
+      options: { plugins: { legend: { display: false } } }
+    });
+  },
+
+  // ========== EMPLOYEE MASTER ==========
+  renderEmployeeMaster() {
+    const emps = App.getFilteredEmployees();
+    const content = document.getElementById('contentArea');
+    
+    content.innerHTML = `
+      <div class="page-header">
+        <div>
+          <div class="page-title">Employee Master</div>
+          <div class="page-subtitle">${emps.length} employees</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline btn-sm" onclick="ExcelExport.exportEmployeeMaster()">📥 Export</button>
+          <button class="btn btn-primary btn-sm" onclick="Forms.showAddEmployee()">+ Add Employee</button>
+        </div>
+      </div>
+      ${App.renderFilterBar()}
+      <div class="card">
+        <div class="card-body no-pad">
+          <div class="data-table-wrapper" style="max-height:600px;overflow-y:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Emp Code</th>
+                  <th>Name</th>
+                  <th>Designation</th>
+                  <th>Division</th>
+                  <th>HQ</th>
+                  <th>DOJ</th>
+                  <th>Status</th>
+                  <th>Conf Due</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${emps.slice((State.currentPageNum-1)*State.pageSize, State.currentPageNum*State.pageSize).map(e => `
+                  <tr onclick="App.openProfile('${e.EmployeeCode}')">
+                    <td>${e.EmployeeCode}</td>
+                    <td style="color:var(--text-primary);font-weight:500;">${Utils.escapeHtml(e.EmployeeName)}</td>
+                    <td>${Utils.escapeHtml(e.Designation)}</td>
+                    <td>${e.Division}</td>
+                    <td>${e.HQ}</td>
+                    <td>${Utils.formatDateShort(e.DOJ)}</td>
+                    <td><span class="status-badge ${Utils.getStatusClass(e.EmploymentStatus)}">${e.EmploymentStatus}</span></td>
+                    <td>${Utils.formatDateShort(e.ConfirmationDueDate)}</td>
+                    <td>
+                      <button class="btn btn-xs btn-ghost" onclick="event.stopPropagation();Forms.showEditEmployee('${e.EmployeeCode}')">✏️</button>
+                      <button class="btn btn-xs btn-ghost" onclick="event.stopPropagation();App.openProfile('${e.EmployeeCode}')">👁️</button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          ${App.renderPagination(emps.length)}
+        </div>
+      </div>
+    `;
+  },
+
+  // ========== EMPLOYEE DIRECTORY ==========
+  renderDirectory() {
+    const emps = App.getFilteredEmployees();
+    const content = document.getElementById('contentArea');
+    
+    content.innerHTML = `
+      <div class="page-header">
+        <div>
+          <div class="page-title">Employee Directory</div>
+          <div class="page-subtitle">${emps.length} employees found</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline btn-sm" onclick="ExcelExport.exportEmployeeMaster()">📥 Export All</button>
+          <button class="btn btn-primary btn-sm" onclick="Forms.showAddEmployee()">+ Add Employee</button>
+        </div>
+      </div>
+      ${App.renderFilterBar()}
+      <div class="card">
+        <div class="card-body no-pad">
+          <div class="data-table-wrapper" style="max-height:600px;overflow-y:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Emp Code</th>
+                  <th>Employee Name</th>
+                  <th>Designation</th>
+                  <th>Division</th>
+                  <th>HQ</th>
+                  <th>DOJ</th>
+                  <th>Tenure</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${emps.slice((State.currentPageNum-1)*State.pageSize, State.currentPageNum*State.pageSize).map(e => {
+                  const tenure = Utils.calculateTenure(e.DOJ);
+                  return `
+                    <tr onclick="App.openProfile('${e.EmployeeCode}')">
+                      <td>${e.EmployeeCode}</td>
+                      <td>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                          <div style="width:28px;height:28px;border-radius:50%;background:var(--brand-primary);color:white;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;">${Utils.getInitials(e.EmployeeName)}</div>
+                          <span style="color:var(--text-primary);font-weight:500;">${Utils.escapeHtml(e.EmployeeName)}</span>
+                        </div>
+                      </td>
+                      <td>${Utils.escapeHtml(e.Designation)}</td>
+                      <td>${e.Division}</td>
+                      <td>${e.HQ}</td>
+                      <td>${Utils.formatDateShort(e.DOJ)}</td>
+                      <td>${tenure.text}</td>
+                      <td><span class="status-badge ${Utils.getStatusClass(e.EmploymentStatus)}">${e.EmploymentStatus}</span></td>
+                      <td>
+                        <button class="btn btn-xs btn-primary" onclick="event.stopPropagation();App.openProfile('${e.EmployeeCode}')">View</button>
+                        <button class="btn btn-xs btn-ghost" onclick="event.stopPropagation();Forms.showEditEmployee('${e.EmployeeCode}')">✏️</button>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+          ${App.renderPagination(emps.length)}
+        </div>
+      </div>
+    `;
+  },
+
+  // ========== EMPLOYEE PROFILE ==========
+  renderProfile() {
+    const emp = State.currentEmployee;
+    if (!emp) { App.navigate('directory'); return; }
+    
+    const tenure = Utils.calculateTenure(emp.DOJ);
+    const empJoining = State.joining.filter(j => j.EmployeeCode === emp.EmployeeCode);
+    const empResignation = State.resignation.filter(r => r.EmployeeCode === emp.EmployeeCode);
+    const empConfirmation = State.confirmation.filter(c => c.EmployeeCode === emp.EmployeeCode);
+    const empAttendance = State.attendance.filter(a => a.EmployeeCode === emp.EmployeeCode);
+    const empLeave = State.leave.filter(l => l.EmployeeCode === emp.EmployeeCode);
+    const empPayroll = State.payroll.filter(p => p.EmployeeCode === emp.EmployeeCode);
+    const empAudit = State.audit.filter(a => a.EmployeeCode === emp.EmployeeCode);
+    
+    const content = document.getElementById('contentArea');
+    content.innerHTML = `
+      <button class="btn btn-ghost btn-sm mb-3" onclick="App.navigate('directory')">← Back to Directory</button>
+      
+      <div class="profile-header">
+        <div class="profile-avatar">${Utils.getInitials(emp.EmployeeName)}</div>
+        <div class="profile-info">
+          <h2>${Utils.escapeHtml(emp.EmployeeName)}</h2>
+          <div class="profile-code">${emp.EmployeeCode}</div>
+          <div class="profile-meta">
+            <span>📋 ${Utils.escapeHtml(emp.Designation)}</span>
+            <span>🏢 ${emp.Division}</span>
+            <span>📍 ${emp.HQ}</span>
+            <span class="status-badge ${Utils.getStatusClass(emp.EmploymentStatus)}">${emp.EmploymentStatus}</span>
+          </div>
+        </div>
+        <div class="profile-actions">
+          <button class="btn btn-outline btn-sm" onclick="Forms.showEditEmployee('${emp.EmployeeCode}')">✏️ Edit</button>
+        </div>
+      </div>
+
+      <div class="tabs" id="profileTabs">
+        <div class="tab active" onclick="ProfileTabs.switchTab('overview')">Overview</div>
+        <div class="tab" onclick="ProfileTabs.switchTab('employment')">Employment</div>
+        <div class="tab" onclick="ProfileTabs.switchTab('probation')">Probation</div>
+        <div class="tab" onclick="ProfileTabs.switchTab('attendance')">Attendance</div>
+        <div class="tab" onclick="ProfileTabs.switchTab('leave')">Leave</div>
+        <div class="tab" onclick="ProfileTabs.switchTab('payroll')">Payroll</div>
+        <div class="tab" onclick="ProfileTabs.switchTab('joining')">Joining</div>
+        <div class="tab" onclick="ProfileTabs.switchTab('resignation')">Resignation</div>
+        <div class="tab" onclick="ProfileTabs.switchTab('activity')">Activity History</div>
+      </div>
+
+      <div class="card mt-3">
+        <div class="card-body" id="profileTabContent">
+          <!-- Overview tab -->
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Date of Joining</label>
+              <div style="font-weight:600;">${Utils.formatDateShort(emp.DOJ)}</div>
+            </div>
+            <div class="form-group">
+              <label>Current Tenure</label>
+              <div style="font-weight:600;">${tenure.text}</div>
+            </div>
+            <div class="form-group">
+              <label>Designation</label>
+              <div style="font-weight:600;">${Utils.escapeHtml(emp.Designation)}</div>
+            </div>
+            <div class="form-group">
+              <label>Division</label>
+              <div style="font-weight:600;">${emp.Division}</div>
+            </div>
+            <div class="form-group">
+              <label>HQ / Location</label>
+              <div style="font-weight:600;">${emp.HQ}</div>
+            </div>
+            <div class="form-group">
+              <label>Department</label>
+              <div style="font-weight:600;">${emp.Department || '-'}</div>
+            </div>
+            <div class="form-group">
+              <label>Employment Status</label>
+              <div><span class="status-badge ${Utils.getStatusClass(emp.EmploymentStatus)}">${emp.EmploymentStatus}</span></div>
+            </div>
+            <div class="form-group">
+              <label>Confirmation Due Date</label>
+              <div style="font-weight:600;">${Utils.formatDateShort(emp.ConfirmationDueDate)}</div>
+            </div>
+            <div class="form-group">
+              <label>Gender</label>
+              <div style="font-weight:600;">${emp.Gender || '<span style="color:var(--text-tertiary);font-style:italic;">Not provided</span>'}</div>
+            </div>
+            <div class="form-group">
+              <label>Employee Type</label>
+              <div style="font-weight:600;">${emp.EmployeeType || '-'}</div>
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <div style="font-weight:600;">${emp.Email || '<span style="color:var(--text-tertiary);font-style:italic;">Not provided</span>'}</div>
+            </div>
+            <div class="form-group">
+              <label>Mobile</label>
+              <div style="font-weight:600;">${emp.Mobile || '<span style="color:var(--text-tertiary);font-style:italic;">Not provided</span>'}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Set up tab content data
+    window._profileData = { emp, empJoining, empResignation, empConfirmation, empAttendance, empLeave, empPayroll, empAudit };
+  },
+
+  // ========== JOINING & ONBOARDING ==========
+  renderJoining() {
+    const content = document.getElementById('contentArea');
+    const joining = State.joining;
+    
+    // Monthly joining stats
+    const joiningByMonth = {};
+    const joiningByDiv = Utils.countBy(joining, 'Division');
+    const joiningByHQ = Utils.countBy(joining, 'HQ');
+    
+    joining.forEach(j => {
+      const mk = Utils.getMonthKey(j.DOJ);
+      if (mk) joiningByMonth[mk] = (joiningByMonth[mk] || 0) + 1;
+    });
+    
+    content.innerHTML = `
+      <div class="page-header">
+        <div>
+          <div class="page-title">Joining & Onboarding</div>
+          <div class="page-subtitle">${joining.length} joining records</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline btn-sm" onclick="ExcelExport.exportSheet('joining')">📥 Export</button>
+          <button class="btn btn-primary btn-sm" onclick="Forms.showAddJoining()">+ Add Joining</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card accent-green">
+          <div class="kpi-icon green">🤝</div>
+          <div class="kpi-label">Total Joinings</div>
+          <div class="kpi-value">${joining.length}</div>
+        </div>
+        <div class="kpi-card accent-blue">
+          <div class="kpi-icon blue">🏢</div>
+          <div class="kpi-label">Divisions</div>
+          <div class="kpi-value">${Object.keys(joiningByDiv).length}</div>
+        </div>
+        <div class="kpi-card accent-purple">
+          <div class="kpi-icon purple">📍</div>
+          <div class="kpi-label">HQ Locations</div>
+          <div class="kpi-value">${Object.keys(joiningByHQ).length}</div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid cols-2" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Monthly Joining Trend</div></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartJoinMonth"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Joining by Division</div></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartJoinDiv"></canvas></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Joining Records</div>
+        </div>
+        <div class="card-body no-pad">
+          <div class="data-table-wrapper" style="max-height:400px;overflow-y:auto;">
+            <table class="data-table">
+              <thead>
+                <tr><th>Emp Code</th><th>Name</th><th>Designation</th><th>DOJ</th><th>HQ</th><th>Division</th></tr>
+              </thead>
+              <tbody>
+                ${joining.slice((State.currentPageNum-1)*State.pageSize, State.currentPageNum*State.pageSize).map(j => `
+                  <tr onclick="App.openProfile('${j.EmployeeCode}')">
+                    <td>${j.EmployeeCode}</td>
+                    <td style="color:var(--text-primary);font-weight:500;">${Utils.escapeHtml(j.EmployeeName)}</td>
+                    <td>${Utils.escapeHtml(j.Designation)}</td>
+                    <td>${Utils.formatDateShort(j.DOJ)}</td>
+                    <td>${j.HQ}</td>
+                    <td>${j.Division}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          ${App.renderPagination(joining.length)}
+        </div>
+      </div>
+    `;
+
+    // Charts
+    const months = Object.keys(joiningByMonth).sort();
+    App.createChart('chartJoinMonth', {
+      type: 'bar',
+      data: {
+        labels: months.map(m => { const [y,mo] = m.split('-'); return ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+mo] + " '" + y.slice(2); }),
+        datasets: [{ label: 'Joinings', data: months.map(m => joiningByMonth[m]), backgroundColor: '#10b981', borderRadius: 4 }]
+      },
+      options: { plugins: { legend: { display: false } } }
+    });
+
+    App.createChart('chartJoinDiv', {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(joiningByDiv),
+        datasets: [{ data: Object.values(joiningByDiv), backgroundColor: Utils.chartColors, borderWidth: 0 }]
+      },
+      options: { cutout: '50%' }
+    });
+  },
+
+  // ========== ATTRITION & RESIGNATION ==========
+  renderAttrition() {
+    const content = document.getElementById('contentArea');
+    const res = State.resignation;
+    const active = App.getActiveEmployees();
+    
+    const exitsByDiv = Utils.countBy(res, 'Division');
+    const exitsByHQ = Utils.countBy(res, 'HQ');
+    const exitsByDes = Utils.countBy(res, 'Designation');
+    const exitsByStatus = Utils.countBy(res, 'Status');
+    const attritionRate = active.length > 0 ? (res.length / (active.length + res.length) * 100) : 0;
+    
+    const exitsByMonth = {};
+    res.forEach(r => {
+      const mk = Utils.getMonthKey(r.LWD);
+      if (mk) exitsByMonth[mk] = (exitsByMonth[mk] || 0) + 1;
+    });
+    
+    content.innerHTML = `
+      <div class="page-header">
+        <div>
+          <div class="page-title">Attrition & Resignation</div>
+          <div class="page-subtitle">${res.length} resignation records</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline btn-sm" onclick="ExcelExport.exportSheet('resignation')">📥 Export</button>
+          <button class="btn btn-primary btn-sm" onclick="Forms.showAddResignation()">+ Add Resignation</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card accent-red">
+          <div class="kpi-icon red">🚪</div>
+          <div class="kpi-label">Total Exits</div>
+          <div class="kpi-value">${res.length}</div>
+        </div>
+        <div class="kpi-card accent-orange">
+          <div class="kpi-icon orange">📉</div>
+          <div class="kpi-label">Attrition Rate</div>
+          <div class="kpi-value">${Utils.formatPercent(attritionRate)}</div>
+        </div>
+        <div class="kpi-card accent-purple">
+          <div class="kpi-icon purple">🏢</div>
+          <div class="kpi-label">Divisions Affected</div>
+          <div class="kpi-value">${Object.keys(exitsByDiv).length}</div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid cols-2" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Monthly Exits</div></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartExitMonth"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Exits by Division</div></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartExitDivision"></canvas></div></div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid cols-2" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Exits by Top HQs</div></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartExitHQPage"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Exit Status Distribution</div></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartExitStatus"></canvas></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Resignation Records</div></div>
+        <div class="card-body no-pad">
+          <div class="data-table-wrapper" style="max-height:400px;overflow-y:auto;">
+            <table class="data-table">
+              <thead>
+                <tr><th>Emp Code</th><th>Name</th><th>Designation</th><th>Division</th><th>HQ</th><th>DOJ</th><th>LWD</th><th>Status</th><th>Tenure</th></tr>
+              </thead>
+              <tbody>
+                ${res.slice((State.currentPageNum-1)*State.pageSize, State.currentPageNum*State.pageSize).map(r => `
+                  <tr>
+                    <td>${r.EmployeeCode}</td>
+                    <td style="color:var(--text-primary);font-weight:500;">${Utils.escapeHtml(r.EmployeeName)}</td>
+                    <td>${Utils.escapeHtml(r.Designation)}</td>
+                    <td>${r.Division}</td>
+                    <td>${r.HQ}</td>
+                    <td>${Utils.formatDateShort(r.DOJ)}</td>
+                    <td>${Utils.formatDateShort(r.LWD)}</td>
+                    <td><span class="status-badge confirmed">${r.Status}</span></td>
+                    <td>${r.Tenure || Utils.calculateTenure(r.DOJ, Utils.parseDate(r.LWD)).text}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          ${App.renderPagination(res.length)}
+        </div>
+      </div>
+    `;
+
+    const months = Object.keys(exitsByMonth).sort();
+    App.createChart('chartExitMonth', {
+      type: 'bar',
+      data: {
+        labels: months.map(m => { const [y,mo] = m.split('-'); return ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+mo] + " '" + y.slice(2); }),
+        datasets: [{ label: 'Exits', data: months.map(m => exitsByMonth[m]), backgroundColor: '#ef4444', borderRadius: 4 }]
+      },
+      options: { plugins: { legend: { display: false } } }
+    });
+
+    App.createChart('chartExitDivision', {
+      type: 'doughnut',
+      data: { labels: Object.keys(exitsByDiv), datasets: [{ data: Object.values(exitsByDiv), backgroundColor: Utils.chartColors, borderWidth: 0 }] },
+      options: { cutout: '50%' }
+    });
+
+    const topExitHQ = Utils.topN(exitsByHQ, 10);
+    App.createChart('chartExitHQPage', {
+      type: 'bar',
+      data: { labels: Object.keys(topExitHQ), datasets: [{ label: 'Exits', data: Object.values(topExitHQ), backgroundColor: '#ef4444', borderRadius: 4 }] },
+      options: { indexAxis: 'y', plugins: { legend: { display: false } } }
+    });
+
+    App.createChart('chartExitStatus', {
+      type: 'doughnut',
+      data: { labels: Object.keys(exitsByStatus), datasets: [{ data: Object.values(exitsByStatus), backgroundColor: Utils.chartColors, borderWidth: 0 }] },
+      options: { cutout: '50%' }
+    });
+  },
+
+  // ========== PROBATION & CONFIRMATION ==========
+  renderProbation() {
+    const content = document.getElementById('contentArea');
+    const conf = State.confirmation;
+    const probationEmps = State.employees.filter(e => e.EmploymentStatus === 'Probation');
+    
+    const confByMonth = {};
+    conf.forEach(c => {
+      const mk = Utils.getMonthKey(c.ConfirmationDate);
+      if (mk) confByMonth[mk] = (confByMonth[mk] || 0) + 1;
+    });
+    
+    const confByDiv = Utils.countBy(conf, 'Division');
+    
+    content.innerHTML = `
+      <div class="page-header">
+        <div>
+          <div class="page-title">Probation & Confirmation</div>
+          <div class="page-subtitle">${conf.length} confirmation records · ${probationEmps.length} on probation</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline btn-sm" onclick="ExcelExport.exportSheet('confirmation')">📥 Export</button>
+          <button class="btn btn-primary btn-sm" onclick="Forms.showAddConfirmation()">+ Add Confirmation</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card accent-green">
+          <div class="kpi-icon green">✅</div>
+          <div class="kpi-label">Confirmations</div>
+          <div class="kpi-value">${conf.length}</div>
+        </div>
+        <div class="kpi-card accent-orange">
+          <div class="kpi-icon orange">⏳</div>
+          <div class="kpi-label">Pending (On Probation)</div>
+          <div class="kpi-value">${probationEmps.length}</div>
+        </div>
+        <div class="kpi-card accent-blue">
+          <div class="kpi-icon blue">🏢</div>
+          <div class="kpi-label">Divisions</div>
+          <div class="kpi-value">${Object.keys(confByDiv).length}</div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid cols-2" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Confirmation Trend</div></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartConfTrend"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Confirmations by Division</div></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartConfDiv"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- Employees on Probation -->
+      <div class="section-header">
+        <div class="section-title">Employees on Probation</div>
+        <span class="section-badge">${probationEmps.length}</span>
+      </div>
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-body no-pad">
+          <div class="data-table-wrapper" style="max-height:300px;overflow-y:auto;">
+            <table class="data-table">
+              <thead><tr><th>Emp Code</th><th>Name</th><th>Designation</th><th>Division</th><th>HQ</th><th>DOJ</th><th>Conf Due</th><th>Tenure</th></tr></thead>
+              <tbody>
+                ${probationEmps.map(e => `
+                  <tr onclick="App.openProfile('${e.EmployeeCode}')">
+                    <td>${e.EmployeeCode}</td>
+                    <td style="color:var(--text-primary);font-weight:500;">${Utils.escapeHtml(e.EmployeeName)}</td>
+                    <td>${Utils.escapeHtml(e.Designation)}</td>
+                    <td>${e.Division}</td>
+                    <td>${e.HQ}</td>
+                    <td>${Utils.formatDateShort(e.DOJ)}</td>
+                    <td>${Utils.formatDateShort(e.ConfirmationDueDate)}</td>
+                    <td>${Utils.calculateTenure(e.DOJ).text}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirmation Records -->
+      <div class="section-header"><div class="section-title">Confirmation Records</div></div>
+      <div class="card">
+        <div class="card-body no-pad">
+          <div class="data-table-wrapper" style="max-height:400px;overflow-y:auto;">
+            <table class="data-table">
+              <thead><tr><th>Emp Code</th><th>Name</th><th>Designation</th><th>Division</th><th>HQ</th><th>DOJ</th><th>Confirmation Date</th></tr></thead>
+              <tbody>
+                ${conf.slice((State.currentPageNum-1)*State.pageSize, State.currentPageNum*State.pageSize).map(c => `
+                  <tr onclick="App.openProfile('${c.EmployeeCode}')">
+                    <td>${c.EmployeeCode}</td>
+                    <td style="color:var(--text-primary);font-weight:500;">${Utils.escapeHtml(c.EmployeeName)}</td>
+                    <td>${Utils.escapeHtml(c.Designation)}</td>
+                    <td>${c.Division}</td>
+                    <td>${c.HQ}</td>
+                    <td>${Utils.formatDateShort(c.DOJ)}</td>
+                    <td>${Utils.formatDateShort(c.ConfirmationDate)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          ${App.renderPagination(conf.length)}
+        </div>
+      </div>
+    `;
+
+    const confMonths = Object.keys(confByMonth).sort();
+    App.createChart('chartConfTrend', {
+      type: 'bar',
+      data: {
+        labels: confMonths.map(m => { const [y,mo] = m.split('-'); return ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+mo] + " '" + y.slice(2); }),
+        datasets: [{ label: 'Confirmations', data: confMonths.map(m => confByMonth[m]), backgroundColor: '#10b981', borderRadius: 4 }]
+      },
+      options: { plugins: { legend: { display: false } } }
+    });
+
+    App.createChart('chartConfDiv', {
+      type: 'doughnut',
+      data: { labels: Object.keys(confByDiv), datasets: [{ data: Object.values(confByDiv), backgroundColor: Utils.chartColors, borderWidth: 0 }] },
+      options: { cutout: '50%' }
+    });
+  },
+
+  // ========== ATTENDANCE (Awaiting Data) ==========
+  renderAttendance() {
+    const content = document.getElementById('contentArea');
+    const att = State.attendance;
+    
+    content.innerHTML = `
+      <div class="page-header">
+        <div>
+          <div class="page-title">Attendance Management</div>
+          <div class="page-subtitle">${att.length} records</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline btn-sm" onclick="ExcelExport.exportSheet('attendance')">📥 Export</button>
+          <button class="btn btn-primary btn-sm" onclick="Forms.showAddAttendance()">+ Add Attendance</button>
+        </div>
+      </div>
+
+      ${att.length === 0 ? `
+        <div class="card">
+          <div class="card-body">
+            <div class="empty-state">
+              <div class="empty-state-icon">📅</div>
+              <div class="empty-state-title">Attendance Data Not Yet Entered</div>
+              <div class="empty-state-text">Monthly attendance data has not been provided. Enter individual or bulk attendance records to begin tracking.</div>
+              <div style="display:flex;gap:8px;justify-content:center;">
+                <button class="btn btn-primary" onclick="Forms.showAddAttendance()">+ Enter Attendance</button>
+                <button class="btn btn-outline" onclick="App.navigate('import')">📥 Bulk Import</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ` : this.renderAttendanceData(att)}
+    `;
+  },
+
+  renderAttendanceData(att) {
+    return `
+      <div class="card">
+        <div class="card-body no-pad">
+          <table class="data-table">
+            <thead><tr><th>Month</th><th>Emp Code</th><th>Present</th><th>Absent</th><th>Late</th><th>Overtime</th><th>Attendance %</th></tr></thead>
+            <tbody>
+              ${att.map(a => `
+                <tr>
+                  <td>${a.Month}</td>
+                  <td>${a.EmployeeCode}</td>
+                  <td>${a.PresentDays}</td>
+                  <td>${a.AbsentDays}</td>
+                  <td>${a.LateArrivals}</td>
+                  <td>${a.OvertimeHours}</td>
+                  <td>${a.PresentDays && a.AbsentDays ? Utils.formatPercent(a.PresentDays/(a.PresentDays+a.AbsentDays)*100) : '-'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  },
+
+  // ========== LEAVE MANAGEMENT ==========
+  renderLeave() {
+    const content = document.getElementById('contentArea');
+    const lv = State.leave;
+    
+    content.innerHTML = `
+      <div class="page-header">
+        <div>
+          <div class="page-title">Leave Management</div>
+          <div class="page-subtitle">${lv.length} records</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline btn-sm" onclick="ExcelExport.exportSheet('leave')">📥 Export</button>
+          <button class="btn btn-primary btn-sm" onclick="Forms.showAddLeave()">+ Add Leave</button>
+        </div>
+      </div>
+
+      ${lv.length === 0 ? `
+        <div class="card"><div class="card-body">
+          <div class="empty-state">
+            <div class="empty-state-icon">🏖️</div>
+            <div class="empty-state-title">Leave Data Not Yet Entered</div>
+            <div class="empty-state-text">Monthly leave records have not been provided. Enter leave records to begin tracking CL, SL, EL, LOP, and C-Off.</div>
+            <button class="btn btn-primary" onclick="Forms.showAddLeave()">+ Enter Leave Record</button>
+          </div>
+        </div></div>
+      ` : `
+        <div class="card"><div class="card-body no-pad">
+          <table class="data-table">
+            <thead><tr><th>Month</th><th>Emp Code</th><th>Type</th><th>Days</th><th>Reason</th><th>Status</th></tr></thead>
+            <tbody>${lv.map(l => `
+              <tr><td>${l.Month}</td><td>${l.EmployeeCode}</td><td>${l.LeaveType}</td><td>${l.Days}</td><td>${l.Reason||'-'}</td><td>${l.ApprovalStatus||'-'}</td></tr>
+            `).join('')}</tbody>
+          </table>
+        </div></div>
+      `}
+    `;
+  },
+
+  // ========== PAYROLL ==========
+  renderPayroll() {
+    const content = document.getElementById('contentArea');
+    const pay = State.payroll;
+    
+    content.innerHTML = `
+      <div class="page-header">
+        <div>
+          <div class="page-title">Payroll Management</div>
+          <div class="page-subtitle">${pay.length} records</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline btn-sm" onclick="ExcelExport.exportSheet('payroll')">📥 Export</button>
+          <button class="btn btn-primary btn-sm" onclick="Forms.showAddPayroll()">+ Add Payroll</button>
+        </div>
+      </div>
+
+      ${pay.length === 0 ? `
+        <div class="card"><div class="card-body">
+          <div class="empty-state">
+            <div class="empty-state-icon">💰</div>
+            <div class="empty-state-title">Payroll Data Not Yet Provided</div>
+            <div class="empty-state-text">Monthly payroll data has not been entered. Enter payroll records to begin tracking salary disbursements.</div>
+            <button class="btn btn-primary" onclick="Forms.showAddPayroll()">+ Enter Payroll Data</button>
+          </div>
+        </div></div>
+      ` : `
+        <div class="card"><div class="card-body no-pad">
+          <table class="data-table">
+            <thead><tr><th>Month</th><th>Emp Code</th><th>Total</th><th>Released</th><th>Hold</th><th>Deductions</th><th>Net</th><th>Status</th></tr></thead>
+            <tbody>${pay.map(p => `
+              <tr><td>${p.Month}</td><td>${p.EmployeeCode}</td><td>${Utils.formatCurrency(p.TotalPayroll)}</td><td>${Utils.formatCurrency(p.SalaryReleased)}</td><td>${Utils.formatCurrency(p.SalaryOnHold)}</td><td>${Utils.formatCurrency(p.Deductions)}</td><td>${Utils.formatCurrency(p.NetSalary)}</td><td>${p.PayrollStatus||'-'}</td></tr>
+            `).join('')}</tbody>
+          </table>
+        </div></div>
+      `}
+    `;
+  },
+
+  // ========== RECRUITMENT ==========
+  renderRecruitment() {
+    const content = document.getElementById('contentArea');
+    const rec = State.recruitment;
+    
+    content.innerHTML = `
+      <div class="page-header">
+        <div>
+          <div class="page-title">Recruitment Dashboard</div>
+          <div class="page-subtitle">${rec.length} records</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline btn-sm" onclick="ExcelExport.exportSheet('recruitment')">📥 Export</button>
+          <button class="btn btn-primary btn-sm" onclick="Forms.showAddRecruitment()">+ Add Recruitment</button>
+        </div>
+      </div>
+
+      ${rec.length === 0 ? `
+        <div class="card"><div class="card-body">
+          <div class="empty-state">
+            <div class="empty-state-icon">🎯</div>
+            <div class="empty-state-title">Awaiting Recruitment Data</div>
+            <div class="empty-state-text">Recruitment pipeline data has not been entered. Add recruitment records to track positions, applications, interviews, and offers.</div>
+            <button class="btn btn-primary" onclick="Forms.showAddRecruitment()">+ Enter Recruitment Data</button>
+          </div>
+        </div></div>
+      ` : `
+        <div class="card"><div class="card-body no-pad">
+          <table class="data-table">
+            <thead><tr><th>Month</th><th>Position</th><th>Dept</th><th>Open</th><th>Apps</th><th>Interviews</th><th>Offers</th><th>Accepted</th><th>Status</th></tr></thead>
+            <tbody>${rec.map(r => `
+              <tr><td>${r.Month}</td><td>${r.Position}</td><td>${r.Department||'-'}</td><td>${r.OpenPositions}</td><td>${r.Applications}</td><td>${r.Interviews}</td><td>${r.OffersReleased}</td><td>${r.OffersAccepted}</td><td>${r.Status||'-'}</td></tr>
+            `).join('')}</tbody>
+          </table>
+        </div></div>
+      `}
+    `;
+  },
+
+  // ========== HISTORICAL HEADCOUNT ==========
+  renderHeadcount() {
+    const content = document.getElementById('contentArea');
+    const hc = State.headcount;
+    
+    content.innerHTML = `
+      <div class="page-header">
+        <div>
+          <div class="page-title">Historical Headcount</div>
+          <div class="page-subtitle">${hc.length} records</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-outline btn-sm" onclick="ExcelExport.exportSheet('headcount')">📥 Export</button>
+          <button class="btn btn-primary btn-sm" onclick="Forms.showAddHeadcount()">+ Add Headcount</button>
+        </div>
+      </div>
+
+      ${hc.length === 0 ? `
+        <div class="card"><div class="card-body">
+          <div class="empty-state">
+            <div class="empty-state-icon">📈</div>
+            <div class="empty-state-title">Historical Headcount Data Not Yet Provided</div>
+            <div class="empty-state-text">Official monthly headcount data has not been entered. Until official data is provided, headcount calculations are reconstructed from available data and may require validation.</div>
+            <div class="insight-card mt-3" style="text-align:left;">
+              <span class="insight-icon">⚠️</span>
+              <span><strong>Reconstructed — Validation Required.</strong> Current headcount figures are derived from employee master data. Enter official historical headcount for authoritative reporting.</span>
+            </div>
+            <button class="btn btn-primary mt-3" onclick="Forms.showAddHeadcount()">+ Enter Historical Headcount</button>
+          </div>
+        </div></div>
+      ` : `
+        <div class="card"><div class="card-body no-pad">
+          <table class="data-table">
+            <thead><tr><th>Month</th><th>Department</th><th>Division</th><th>HQ</th><th>Official Headcount</th><th>Opening</th><th>Closing</th></tr></thead>
+            <tbody>${hc.map(h => `
+              <tr><td>${h.Month}</td><td>${h.Department||'-'}</td><td>${h.Division||'-'}</td><td>${h.HQ||'-'}</td><td>${h.OfficialHeadcount}</td><td>${h.OpeningHeadcount||'-'}</td><td>${h.ClosingHeadcount||'-'}</td></tr>
+            `).join('')}</tbody>
+          </table>
+        </div></div>
+      `}
+    `;
+  },
+
+  // ========== MONTHLY DATA ENTRY ==========
+  renderDataEntry() {
+    const content = document.getElementById('contentArea');
+    const months = Utils.getMonthsList(2025, 2027);
+    
+    content.innerHTML = `
+      <div class="page-header">
+        <div>
+          <div class="page-title">Monthly HR Data Entry Center</div>
+          <div class="page-subtitle">Enter monthly HR data from one place</div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;max-width:600px;">
+            <div class="form-group" style="grid-column:1/-1;">
+              <label>Select Month</label>
+              <select id="dataEntryMonth" style="font-size:15px;padding:12px;">
+                ${months.map(m => `<option value="${m.value}" ${m.value === '2026-08' ? 'selected' : ''}>${m.label}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:14px;">
+        ${[
+          { title: 'Employee Master Updates', icon: '👥', page: 'employee-master', desc: 'Add or update employee records' },
+          { title: 'Joining', icon: '🤝', page: 'joining', desc: 'Record new employee joinings' },
+          { title: 'Resignation', icon: '🚪', page: 'attrition', desc: 'Record employee resignations' },
+          { title: 'Confirmation', icon: '✅', page: 'probation', desc: 'Process employee confirmations' },
+          { title: 'Attendance', icon: '📅', page: 'attendance', desc: 'Enter monthly attendance data' },
+          { title: 'Leave', icon: '🏖️', page: 'leave', desc: 'Record leave applications' },
+          { title: 'Payroll', icon: '💰', page: 'payroll', desc: 'Enter monthly payroll data' },
+          { title: 'Recruitment', icon: '🎯', page: 'recruitment', desc: 'Update recruitment pipeline' },
+          { title: 'Historical Headcount', icon: '📈', page: 'headcount', desc: 'Enter official headcount data' },
+        ].map(item => `
+          <div class="report-card" onclick="App.navigate('${item.page}')">
+            <div class="report-card-icon">${item.icon}</div>
+            <div class="report-card-title">${item.title}</div>
+            <div class="report-card-desc">${item.desc}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  },
+
+  // ========== REPORTS & EXPORT ==========
+  renderReports() {
+    const content = document.getElementById('contentArea');
+    
+    content.innerHTML = `
+      <div class="page-header">
+        <div>
+          <div class="page-title">Reports & Excel Export</div>
+          <div class="page-subtitle">Generate and download HR reports</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary" onclick="ExcelExport.exportAll()">📥 Download Complete HR Excel</button>
+        </div>
+      </div>
+
+      <div class="section-header"><div class="section-title">Available Reports</div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));gap:14px;margin-bottom:20px;">
+        ${[
+          { title: 'Employee Master Report', icon: '👥', action: 'ExcelExport.exportEmployeeMaster()', desc: 'Complete employee directory with all fields' },
+          { title: 'Headcount Report', icon: '📊', action: 'ExcelExport.exportSheet("employees")', desc: 'Current headcount analysis by division, HQ, designation' },
+          { title: 'Joining Report', icon: '🤝', action: 'ExcelExport.exportSheet("joining")', desc: 'All joining records with dates and divisions' },
+          { title: 'Resignation Report', icon: '🚪', action: 'ExcelExport.exportSheet("resignation")', desc: 'Resignation records with tenure and exit details' },
+          { title: 'Confirmation Report', icon: '✅', action: 'ExcelExport.exportSheet("confirmation")', desc: 'Employee confirmation records and dates' },
+          { title: 'Probation Report', icon: '⏳', action: 'ExcelExport.exportProbation()', desc: 'Employees on probation with confirmation due dates' },
+          { title: 'Attrition Report', icon: '📉', action: 'ExcelExport.exportSheet("resignation")', desc: 'Attrition analysis with rates by division and HQ' },
+          { title: 'Attendance Report', icon: '📅', action: 'ExcelExport.exportSheet("attendance")', desc: 'Monthly attendance records' },
+          { title: 'Leave Report', icon: '🏖️', action: 'ExcelExport.exportSheet("leave")', desc: 'Leave records by type and employee' },
+          { title: 'Payroll Report', icon: '💰', action: 'ExcelExport.exportSheet("payroll")', desc: 'Monthly payroll data and summaries' },
+          { title: 'Recruitment Report', icon: '🎯', action: 'ExcelExport.exportSheet("recruitment")', desc: 'Recruitment pipeline data' },
+          { title: 'Data Completeness', icon: '📋', action: 'ExcelExport.exportDataHealth()', desc: 'Data health status across all modules' }
+        ].map(r => `
+          <div class="report-card" onclick="${r.action}">
+            <div class="report-card-icon">${r.icon}</div>
+            <div class="report-card-title">${r.title}</div>
+            <div class="report-card-desc">${r.desc}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="section-header"><div class="section-title">Quick Export</div></div>
+      <div class="card">
+        <div class="card-body">
+          <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Download the complete HR workbook with all current data, including newly entered records.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="ExcelExport.exportAll()">📥 Complete HR Excel (.xlsx)</button>
+            <button class="btn btn-outline" onclick="ExcelExport.exportFiltered()">📥 Export Filtered Data</button>
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+  // ========== DATA IMPORT ==========
+  renderImport() {
+    const content = document.getElementById('contentArea');
+    
+    content.innerHTML = `
+      <div class="page-header">
+        <div>
+          <div class="page-title">Data Import</div>
+          <div class="page-subtitle">Import HR data from Excel files</div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+            <div class="upload-zone-icon">📁</div>
+            <div class="upload-zone-text">Click or drag & drop to upload HR Excel file</div>
+            <div class="upload-zone-sub">Supports .xlsx files</div>
+          </div>
+          <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="ImportHandler.handleFile(this.files[0])">
+        </div>
+      </div>
+
+      <div id="importPreview"></div>
+    `;
+
+    // Drag & drop
+    setTimeout(() => {
+      const zone = document.getElementById('uploadZone');
+      if (!zone) return;
+      zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
+      zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+      zone.addEventListener('drop', (e) => { e.preventDefault(); zone.classList.remove('dragover'); ImportHandler.handleFile(e.dataTransfer.files[0]); });
+    }, 100);
+  },
+
+  // ========== SETTINGS / MASTER DATA ==========
+  renderSettings() {
+    const content = document.getElementById('contentArea');
+    
+    content.innerHTML = `
+      <div class="page-header">
+        <div>
+          <div class="page-title">Master Data / Settings</div>
+          <div class="page-subtitle">Configure organizational master data</div>
+        </div>
+      </div>
+
+      <div class="master-data-grid" id="masterDataGrid">
+        Loading...
+      </div>
+    `;
+
+    this.loadMasterDataSettings();
+  },
+
+  async loadMasterDataSettings() {
+    const categories = [
+      { key: 'departments', label: 'Departments', icon: '🏢' },
+      { key: 'divisions', label: 'Divisions', icon: '🏛️' },
+      { key: 'hqs', label: 'HQs / Locations', icon: '📍' },
+      { key: 'designations', label: 'Designations', icon: '💼' },
+      { key: 'statuses', label: 'Employment Statuses', icon: '📋' },
+      { key: 'levels', label: 'Levels', icon: '📊' },
+      { key: 'leaveTypes', label: 'Leave Types', icon: '🏖️' },
+      { key: 'exitTypes', label: 'Exit Types', icon: '🚪' },
+      { key: 'exitReasons', label: 'Exit Reasons', icon: '💭' },
+      { key: 'employeeTypes', label: 'Employee Types', icon: '👥' },
+      { key: 'confirmationStatuses', label: 'Confirmation Statuses', icon: '✅' },
+      { key: 'recruitmentStatuses', label: 'Recruitment Statuses', icon: '🎯' },
+    ];
+
+    const grid = document.getElementById('masterDataGrid');
+    let html = '';
+    
+    for (const cat of categories) {
+      const data = await db.get(STORES.masterData, cat.key);
+      const values = data ? data.values : [];
+      
+      html += `
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">${cat.icon} ${cat.label}</div>
+            <span class="section-badge">${values.length}</span>
+          </div>
+          <div class="card-body">
+            <ul class="master-item-list">
+              ${values.map((v, i) => `
+                <li>${Utils.escapeHtml(v)} <button class="btn btn-xs btn-ghost" onclick="MasterData.removeItem('${cat.key}', ${i})" title="Remove">✕</button></li>
+              `).join('')}
+            </ul>
+            <div class="master-add-input">
+              <input type="text" id="newItem_${cat.key}" placeholder="Add new ${cat.label.toLowerCase()}..." onkeypress="if(event.key==='Enter')MasterData.addItem('${cat.key}')">
+              <button class="btn btn-xs btn-primary" onclick="MasterData.addItem('${cat.key}')">Add</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    grid.innerHTML = html;
+  }
+};
+
+// ==========================================
+// PROFILE TABS
+// ==========================================
+const ProfileTabs = {
+  switchTab(tabName) {
+    const tabs = document.querySelectorAll('#profileTabs .tab');
+    tabs.forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    const d = window._profileData;
+    if (!d) return;
+    const el = document.getElementById('profileTabContent');
+    
+    const renderers = {
+      overview: () => this.renderOverview(d.emp),
+      employment: () => this.renderEmployment(d.emp),
+      probation: () => this.renderProbationTab(d.emp, d.empConfirmation),
+      attendance: () => this.renderDataTab('Attendance', d.empAttendance, ['Month','PresentDays','AbsentDays','LateArrivals','OvertimeHours']),
+      leave: () => this.renderDataTab('Leave', d.empLeave, ['Month','LeaveType','Days','Reason','ApprovalStatus']),
+      payroll: () => this.renderDataTab('Payroll', d.empPayroll, ['Month','TotalPayroll','SalaryReleased','Deductions','NetSalary','PayrollStatus']),
+      joining: () => this.renderJoiningTab(d.empJoining),
+      resignation: () => this.renderResignationTab(d.empResignation),
+      activity: () => this.renderActivityTab(d.empAudit)
+    };
+    
+    if (renderers[tabName]) el.innerHTML = renderers[tabName]();
+  },
+
+  renderOverview(emp) {
+    const tenure = Utils.calculateTenure(emp.DOJ);
+    return `
+      <div class="form-grid">
+        ${[
+          ['Date of Joining', Utils.formatDateShort(emp.DOJ)],
+          ['Current Tenure', tenure.text],
+          ['Designation', emp.Designation],
+          ['Division', emp.Division],
+          ['HQ / Location', emp.HQ],
+          ['Department', emp.Department || '-'],
+          ['Employment Status', `<span class="status-badge ${Utils.getStatusClass(emp.EmploymentStatus)}">${emp.EmploymentStatus}</span>`],
+          ['Confirmation Due Date', Utils.formatDateShort(emp.ConfirmationDueDate)],
+          ['Gender', emp.Gender || '<em style="color:var(--text-tertiary)">Not provided</em>'],
+          ['Employee Type', emp.EmployeeType || '-'],
+          ['Email', emp.Email || '<em style="color:var(--text-tertiary)">Not provided</em>'],
+          ['Mobile', emp.Mobile || '<em style="color:var(--text-tertiary)">Not provided</em>'],
+        ].map(([label, value]) => `
+          <div class="form-group">
+            <label>${label}</label>
+            <div style="font-weight:600;">${value}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  },
+
+  renderEmployment(emp) {
+    return `<div class="form-grid">
+      ${[
+        ['Employee Code', emp.EmployeeCode],
+        ['Employee Name', emp.EmployeeName],
+        ['Date of Joining', Utils.formatDateShort(emp.DOJ)],
+        ['Division', emp.Division],
+        ['HQ', emp.HQ],
+        ['Designation', emp.Designation],
+        ['Department', emp.Department || '-'],
+        ['Level', emp.Level || '-'],
+        ['Reporting Manager', emp.ReportingManager || '-'],
+        ['Employee Type', emp.EmployeeType || '-'],
+        ['Employment Category', emp.EmploymentCategory || '-'],
+        ['Employment Status', emp.EmploymentStatus],
+      ].map(([l,v]) => `<div class="form-group"><label>${l}</label><div style="font-weight:600;">${Utils.escapeHtml(String(v))}</div></div>`).join('')}
+    </div>`;
+  },
+
+  renderProbationTab(emp, confirmations) {
+    return `
+      <div class="form-grid mb-4">
+        <div class="form-group"><label>Confirmation Due Date</label><div style="font-weight:600;">${Utils.formatDateShort(emp.ConfirmationDueDate)}</div></div>
+        <div class="form-group"><label>Employment Status</label><div><span class="status-badge ${Utils.getStatusClass(emp.EmploymentStatus)}">${emp.EmploymentStatus}</span></div></div>
+      </div>
+      ${confirmations.length > 0 ? `
+        <h4 style="margin-bottom:12px;">Confirmation Records</h4>
+        <table class="data-table">
+          <thead><tr><th>Confirmation Date</th><th>Designation</th><th>Division</th><th>HQ</th></tr></thead>
+          <tbody>${confirmations.map(c => `<tr><td>${Utils.formatDateShort(c.ConfirmationDate)}</td><td>${c.Designation}</td><td>${c.Division}</td><td>${c.HQ}</td></tr>`).join('')}</tbody>
+        </table>
+      ` : '<p style="color:var(--text-tertiary);font-style:italic;">No confirmation records found for this employee.</p>'}
+    `;
+  },
+
+  renderDataTab(title, data, cols) {
+    if (data.length === 0) {
+      return `<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">${title} data not yet entered</div><div class="empty-state-text">No ${title.toLowerCase()} records have been entered for this employee.</div></div>`;
+    }
+    return `<table class="data-table"><thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>${data.map(d => `<tr>${cols.map(c => `<td>${d[c] || '-'}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  },
+
+  renderJoiningTab(joining) {
+    if (joining.length === 0) return '<p style="color:var(--text-tertiary);font-style:italic;">No joining record found.</p>';
+    return joining.map(j => `<div class="form-grid">${Object.entries(j).filter(([k]) => !['id','SlNo'].includes(k)).map(([k,v]) => `<div class="form-group"><label>${k}</label><div style="font-weight:600;">${v || '-'}</div></div>`).join('')}</div>`).join('');
+  },
+
+  renderResignationTab(res) {
+    if (res.length === 0) return '<p style="color:var(--text-tertiary);font-style:italic;">No resignation record found.</p>';
+    return res.map(r => `<div class="form-grid">${Object.entries(r).filter(([k]) => !['id','SlNo'].includes(k)).map(([k,v]) => `<div class="form-group"><label>${k}</label><div style="font-weight:600;">${v || '-'}</div></div>`).join('')}</div>`).join('');
+  },
+
+  renderActivityTab(audit) {
+    if (audit.length === 0) return '<p style="color:var(--text-tertiary);font-style:italic;">No activity history recorded yet.</p>';
+    return audit.sort((a,b) => new Date(b.Timestamp) - new Date(a.Timestamp)).map(a => `
+      <div class="audit-item">
+        <div class="audit-dot"></div>
+        <div class="audit-content">
+          <div class="audit-text"><strong>${a.Module}</strong>: ${a.Action} ${a.Field ? `— ${a.Field}` : ''} ${a.OldValue ? `(${a.OldValue} → ${a.NewValue})` : ''}</div>
+          <div class="audit-time">${new Date(a.Timestamp).toLocaleString()} · ${a.User}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+};
+
+// ==========================================
+// FORMS
+// ==========================================
+const Forms = {
+  showAddEmployee() {
+    const divisions = [...new Set(State.employees.map(e => e.Division).filter(Boolean))].sort();
+    const hqs = [...new Set(State.employees.map(e => e.HQ).filter(Boolean))].sort();
+    const designations = [...new Set(State.employees.map(e => e.Designation).filter(Boolean))].sort();
+    
+    App.showModal('Add New Employee', `
+      <div class="form-step-header">Step 1 — Personal Information</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Employee Code <span class="required">*</span></label><input type="text" id="f_empCode" placeholder="e.g., PRI1200"></div>
+        <div class="form-group"><label>Employee Name <span class="required">*</span></label><input type="text" id="f_empName"></div>
+        <div class="form-group"><label>Gender</label><select id="f_gender"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+        <div class="form-group"><label>Date of Birth</label><input type="date" id="f_dob"></div>
+        <div class="form-group"><label>Mobile</label><input type="text" id="f_mobile"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="f_email"></div>
+      </div>
+      <div class="form-step-header mt-4">Step 2 — Employment Information</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Date of Joining <span class="required">*</span></label><input type="date" id="f_doj"></div>
+        <div class="form-group"><label>Division</label><select id="f_division"><option value="">Select</option>${divisions.map(d => `<option>${d}</option>`).join('')}</select></div>
+        <div class="form-group"><label>HQ / Location</label><select id="f_hq"><option value="">Select</option>${hqs.map(h => `<option>${h}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Designation</label><select id="f_designation"><option value="">Select</option>${designations.map(d => `<option>${d}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Employment Status</label><select id="f_status"><option>Probation</option><option>Confirmed</option><option>Promoted</option></select></div>
+        <div class="form-group"><label>Employee Type</label><select id="f_empType"><option>Full Time</option><option>Contract</option><option>Part Time</option><option>Trainee</option></select></div>
+      </div>
+      <div class="form-step-header mt-4">Step 3 — Probation</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Confirmation Due Date</label><input type="date" id="f_confDue"></div>
+        <div class="form-group"><label>Confirmation Status</label><select id="f_confStatus"><option value="">Select</option><option>Pending</option><option>Confirmed</option><option>Extended</option></select></div>
+      </div>
+    `, `
+      <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="Forms.saveEmployee()">Save Employee</button>
+    `, true);
+  },
+
+  async saveEmployee() {
+    const code = document.getElementById('f_empCode').value.trim();
+    const name = document.getElementById('f_empName').value.trim();
+    const doj = document.getElementById('f_doj').value;
+    
+    if (!code || !name) {
+      App.showToast('Employee Code and Name are required', 'error');
+      return;
+    }
+    
+    // Check duplicate
+    const existing = State.employees.find(e => e.EmployeeCode === code);
+    if (existing) {
+      App.showToast('Employee Code already exists!', 'error');
+      return;
+    }
+    
+    const emp = {
+      EmployeeCode: code,
+      EmployeeName: name,
+      Gender: document.getElementById('f_gender').value,
+      DOB: document.getElementById('f_dob').value,
+      Mobile: document.getElementById('f_mobile').value,
+      Email: document.getElementById('f_email').value,
+      DOJ: doj,
+      Division: document.getElementById('f_division').value,
+      HQ: document.getElementById('f_hq').value,
+      Designation: document.getElementById('f_designation').value,
+      EmploymentStatus: document.getElementById('f_status').value,
+      EmployeeType: document.getElementById('f_empType').value,
+      ConfirmationDueDate: document.getElementById('f_confDue').value,
+      Department: '',
+      Level: '',
+      ReportingManager: '',
+      EmploymentCategory: '',
+      Remarks: '',
+      CreatedAt: new Date().toISOString(),
+      UpdatedAt: new Date().toISOString()
+    };
+    
+    await db.put(STORES.employees, emp);
+    await db.logAudit({ Module: 'Employee', Action: 'Created', Record: code, EmployeeCode: code, Field: '', OldValue: '', NewValue: name });
+    
+    await App.loadAllData();
+    App.closeModal();
+    App.navigate(State.currentPage);
+    App.showToast(`Employee ${name} (${code}) added successfully`, 'success');
+  },
+
+  async showEditEmployee(code) {
+    const emp = State.employees.find(e => e.EmployeeCode === code);
+    if (!emp) return;
+    
+    const divisions = [...new Set(State.employees.map(e => e.Division).filter(Boolean))].sort();
+    const hqs = [...new Set(State.employees.map(e => e.HQ).filter(Boolean))].sort();
+    const designations = [...new Set(State.employees.map(e => e.Designation).filter(Boolean))].sort();
+    
+    App.showModal(`Edit Employee — ${emp.EmployeeCode}`, `
+      <div class="form-grid">
+        <div class="form-group"><label>Employee Code</label><input type="text" value="${emp.EmployeeCode}" disabled></div>
+        <div class="form-group"><label>Employee Name <span class="required">*</span></label><input type="text" id="e_empName" value="${Utils.escapeHtml(emp.EmployeeName)}"></div>
+        <div class="form-group"><label>Gender</label><select id="e_gender"><option value="">Select</option><option ${emp.Gender==='Male'?'selected':''}>Male</option><option ${emp.Gender==='Female'?'selected':''}>Female</option><option ${emp.Gender==='Other'?'selected':''}>Other</option></select></div>
+        <div class="form-group"><label>Mobile</label><input type="text" id="e_mobile" value="${emp.Mobile||''}"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="e_email" value="${emp.Email||''}"></div>
+        <div class="form-group"><label>DOJ</label><input type="date" id="e_doj" value="${emp.DOJ ? (Utils.parseDate(emp.DOJ)||new Date()).toISOString().split('T')[0] : ''}"></div>
+        <div class="form-group"><label>Division</label><select id="e_division">${divisions.map(d => `<option ${emp.Division===d?'selected':''}>${d}</option>`).join('')}</select></div>
+        <div class="form-group"><label>HQ</label><select id="e_hq"><option value="">Select</option>${hqs.map(h => `<option ${emp.HQ===h?'selected':''}>${h}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Designation</label><select id="e_designation"><option value="">Select</option>${designations.map(d => `<option ${emp.Designation===d?'selected':''}>${d}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Status</label><select id="e_status"><option ${emp.EmploymentStatus==='Probation'?'selected':''}>Probation</option><option ${emp.EmploymentStatus==='Confirmed'?'selected':''}>Confirmed</option><option ${emp.EmploymentStatus==='Promoted'?'selected':''}>Promoted</option><option ${emp.EmploymentStatus==='Resigned'?'selected':''}>Resigned</option><option ${emp.EmploymentStatus==='Terminated'?'selected':''}>Terminated</option><option ${emp.EmploymentStatus==='Transferred'?'selected':''}>Transferred</option></select></div>
+        <div class="form-group"><label>Employee Type</label><select id="e_empType"><option ${emp.EmployeeType==='Full Time'?'selected':''}>Full Time</option><option ${emp.EmployeeType==='Contract'?'selected':''}>Contract</option><option ${emp.EmployeeType==='Part Time'?'selected':''}>Part Time</option></select></div>
+        <div class="form-group"><label>Level</label><input type="text" id="e_level" value="${emp.Level||''}"></div>
+        <div class="form-group"><label>Reporting Manager</label><input type="text" id="e_manager" value="${emp.ReportingManager||''}"></div>
+      </div>
+    `, `
+      <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="Forms.updateEmployee('${code}')">Save Changes</button>
+    `, true);
+  },
+
+  async updateEmployee(code) {
+    const emp = State.employees.find(e => e.EmployeeCode === code);
+    if (!emp) return;
+    
+    const changes = [];
+    const fields = {
+      EmployeeName: 'e_empName', Gender: 'e_gender', Mobile: 'e_mobile', Email: 'e_email',
+      Division: 'e_division', HQ: 'e_hq', Designation: 'e_designation', 
+      EmploymentStatus: 'e_status', EmployeeType: 'e_empType', Level: 'e_level',
+      ReportingManager: 'e_manager'
+    };
+    
+    for (const [field, elId] of Object.entries(fields)) {
+      const newVal = document.getElementById(elId).value;
+      if (emp[field] !== newVal) {
+        changes.push({ field, old: emp[field], new: newVal });
+        emp[field] = newVal;
+      }
+    }
+    
+    emp.UpdatedAt = new Date().toISOString();
+    await db.put(STORES.employees, emp);
+    
+    for (const change of changes) {
+      await db.logAudit({ Module: 'Employee', Action: 'Updated', Record: code, EmployeeCode: code, Field: change.field, OldValue: change.old || '', NewValue: change.new });
+    }
+    
+    await App.loadAllData();
+    App.closeModal();
+    App.navigate(State.currentPage);
+    App.showToast(`Employee ${code} updated successfully (${changes.length} changes)`, 'success');
+  },
+
+  showAddJoining() {
+    App.showModal('Add Joining Record', `
+      <div class="form-grid">
+        <div class="form-group"><label>Employee Code <span class="required">*</span></label><input type="text" id="fj_code" placeholder="PRI..."></div>
+        <div class="form-group"><label>Employee Name <span class="required">*</span></label><input type="text" id="fj_name"></div>
+        <div class="form-group"><label>DOJ <span class="required">*</span></label><input type="date" id="fj_doj"></div>
+        <div class="form-group"><label>Designation</label><input type="text" id="fj_des"></div>
+        <div class="form-group"><label>HQ</label><input type="text" id="fj_hq"></div>
+        <div class="form-group"><label>Division</label><input type="text" id="fj_div"></div>
+        <div class="form-group full-width"><label>Remarks</label><input type="text" id="fj_remarks"></div>
+      </div>
+    `, `
+      <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="Forms.saveJoining()">Save</button>
+    `);
+  },
+
+  async saveJoining() {
+    const code = document.getElementById('fj_code').value.trim();
+    const name = document.getElementById('fj_name').value.trim();
+    if (!code || !name) { App.showToast('Employee Code and Name required', 'error'); return; }
+    
+    await db.add(STORES.joining, {
+      EmployeeCode: code, EmployeeName: name,
+      DOJ: document.getElementById('fj_doj').value,
+      Designation: document.getElementById('fj_des').value,
+      HQ: document.getElementById('fj_hq').value,
+      Division: document.getElementById('fj_div').value,
+      Remarks: document.getElementById('fj_remarks').value,
+      JoiningStatus: 'Completed'
+    });
+    
+    await db.logAudit({ Module: 'Joining', Action: 'Created', Record: code, EmployeeCode: code });
+    await App.loadAllData();
+    App.closeModal();
+    App.navigate(State.currentPage);
+    App.showToast('Joining record added', 'success');
+  },
+
+  showAddResignation() {
+    App.showModal('Add Resignation Record', `
+      <div class="form-grid">
+        <div class="form-group"><label>Employee Code <span class="required">*</span></label><input type="text" id="fr_code"></div>
+        <div class="form-group"><label>Employee Name <span class="required">*</span></label><input type="text" id="fr_name"></div>
+        <div class="form-group"><label>Designation</label><input type="text" id="fr_des"></div>
+        <div class="form-group"><label>Division</label><input type="text" id="fr_div"></div>
+        <div class="form-group"><label>HQ</label><input type="text" id="fr_hq"></div>
+        <div class="form-group"><label>DOJ</label><input type="date" id="fr_doj"></div>
+        <div class="form-group"><label>Last Working Day</label><input type="date" id="fr_lwd"></div>
+        <div class="form-group"><label>Status</label><select id="fr_status"><option>Confirmed</option><option>Probation</option></select></div>
+        <div class="form-group"><label>Exit Type</label><select id="fr_exitType"><option value="">Select</option><option>Voluntary</option><option>Involuntary</option><option>Termination</option></select></div>
+        <div class="form-group"><label>Exit Reason</label><input type="text" id="fr_reason"></div>
+      </div>
+    `, `
+      <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="Forms.saveResignation()">Save</button>
+    `);
+  },
+
+  async saveResignation() {
+    const code = document.getElementById('fr_code').value.trim();
+    const name = document.getElementById('fr_name').value.trim();
+    if (!code || !name) { App.showToast('Employee Code and Name required', 'error'); return; }
+    
+    await db.add(STORES.resignation, {
+      EmployeeCode: code, EmployeeName: name,
+      Designation: document.getElementById('fr_des').value,
+      Division: document.getElementById('fr_div').value,
+      HQ: document.getElementById('fr_hq').value,
+      DOJ: document.getElementById('fr_doj').value,
+      LWD: document.getElementById('fr_lwd').value,
+      Status: document.getElementById('fr_status').value,
+      ExitType: document.getElementById('fr_exitType').value,
+      ExitReason: document.getElementById('fr_reason').value
+    });
+    
+    await db.logAudit({ Module: 'Resignation', Action: 'Created', Record: code, EmployeeCode: code });
+    await App.loadAllData();
+    App.closeModal();
+    App.navigate(State.currentPage);
+    App.showToast('Resignation record added', 'success');
+  },
+
+  showAddConfirmation() {
+    App.showModal('Add Confirmation Record', `
+      <div class="form-grid">
+        <div class="form-group"><label>Employee Code <span class="required">*</span></label><input type="text" id="fc_code"></div>
+        <div class="form-group"><label>Employee Name <span class="required">*</span></label><input type="text" id="fc_name"></div>
+        <div class="form-group"><label>DOJ</label><input type="date" id="fc_doj"></div>
+        <div class="form-group"><label>Designation</label><input type="text" id="fc_des"></div>
+        <div class="form-group"><label>Division</label><input type="text" id="fc_div"></div>
+        <div class="form-group"><label>HQ</label><input type="text" id="fc_hq"></div>
+        <div class="form-group"><label>Confirmation Date <span class="required">*</span></label><input type="date" id="fc_confDate"></div>
+        <div class="form-group"><label>Reason</label><input type="text" id="fc_reason"></div>
+      </div>
+    `, `
+      <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="Forms.saveConfirmation()">Save</button>
+    `);
+  },
+
+  async saveConfirmation() {
+    const code = document.getElementById('fc_code').value.trim();
+    const name = document.getElementById('fc_name').value.trim();
+    if (!code || !name) { App.showToast('Employee Code and Name required', 'error'); return; }
+    
+    await db.add(STORES.confirmation, {
+      EmployeeCode: code, EmployeeName: name,
+      DOJ: document.getElementById('fc_doj').value,
+      Designation: document.getElementById('fc_des').value,
+      Division: document.getElementById('fc_div').value,
+      HQ: document.getElementById('fc_hq').value,
+      ConfirmationDate: document.getElementById('fc_confDate').value,
+      ConfirmationStatus: 'Confirmed',
+      Reason: document.getElementById('fc_reason').value,
+    });
+    
+    await db.logAudit({ Module: 'Confirmation', Action: 'Created', Record: code, EmployeeCode: code });
+    await App.loadAllData();
+    App.closeModal();
+    App.navigate(State.currentPage);
+    App.showToast('Confirmation record added', 'success');
+  },
+
+  showAddAttendance() {
+    const months = Utils.getMonthsList(2025, 2027);
+    App.showModal('Add Attendance Record', `
+      <div class="form-grid">
+        <div class="form-group"><label>Month <span class="required">*</span></label><select id="fa_month">${months.map(m => `<option value="${m.value}" ${m.value==='2026-08'?'selected':''}>${m.label}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Employee Code <span class="required">*</span></label><input type="text" id="fa_code"></div>
+        <div class="form-group"><label>Present Days</label><input type="number" id="fa_present" min="0" max="31"></div>
+        <div class="form-group"><label>Absent Days</label><input type="number" id="fa_absent" min="0" max="31"></div>
+        <div class="form-group"><label>Late Arrivals</label><input type="number" id="fa_late" min="0"></div>
+        <div class="form-group"><label>Overtime Hours</label><input type="number" id="fa_overtime" min="0" step="0.5"></div>
+      </div>
+    `, `
+      <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="Forms.saveAttendance()">Save</button>
+    `);
+  },
+
+  async saveAttendance() {
+    const month = document.getElementById('fa_month').value;
+    const code = document.getElementById('fa_code').value.trim();
+    if (!code || !month) { App.showToast('Month and Employee Code required', 'error'); return; }
+    
+    await db.add(STORES.attendance, {
+      Month: month, EmployeeCode: code,
+      PresentDays: parseFloat(document.getElementById('fa_present').value) || 0,
+      AbsentDays: parseFloat(document.getElementById('fa_absent').value) || 0,
+      LateArrivals: parseInt(document.getElementById('fa_late').value) || 0,
+      OvertimeHours: parseFloat(document.getElementById('fa_overtime').value) || 0
+    });
+    
+    await db.logAudit({ Module: 'Attendance', Action: 'Created', Record: `${code} - ${month}`, EmployeeCode: code });
+    await App.loadAllData();
+    App.closeModal();
+    App.navigate(State.currentPage);
+    App.showToast('Attendance record added', 'success');
+  },
+
+  showAddLeave() {
+    const months = Utils.getMonthsList(2025, 2027);
+    App.showModal('Add Leave Record', `
+      <div class="form-grid">
+        <div class="form-group"><label>Month</label><select id="fl_month">${months.map(m => `<option value="${m.value}" ${m.value==='2026-08'?'selected':''}>${m.label}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Employee Code <span class="required">*</span></label><input type="text" id="fl_code"></div>
+        <div class="form-group"><label>Leave Type <span class="required">*</span></label><select id="fl_type"><option>CL</option><option>SL</option><option>EL</option><option>LOP</option><option>C-Off</option></select></div>
+        <div class="form-group"><label>Days</label><input type="number" id="fl_days" min="0" step="0.5"></div>
+        <div class="form-group"><label>From Date</label><input type="date" id="fl_from"></div>
+        <div class="form-group"><label>To Date</label><input type="date" id="fl_to"></div>
+        <div class="form-group full-width"><label>Reason</label><input type="text" id="fl_reason"></div>
+        <div class="form-group"><label>Approval Status</label><select id="fl_approval"><option>Approved</option><option>Pending</option><option>Rejected</option></select></div>
+      </div>
+    `, `
+      <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="Forms.saveLeave()">Save</button>
+    `);
+  },
+
+  async saveLeave() {
+    const code = document.getElementById('fl_code').value.trim();
+    if (!code) { App.showToast('Employee Code required', 'error'); return; }
+    const days = parseFloat(document.getElementById('fl_days').value);
+    if (days < 0) { App.showToast('Leave days cannot be negative', 'error'); return; }
+    
+    await db.add(STORES.leave, {
+      Month: document.getElementById('fl_month').value,
+      EmployeeCode: code,
+      LeaveType: document.getElementById('fl_type').value,
+      Days: days || 0,
+      FromDate: document.getElementById('fl_from').value,
+      ToDate: document.getElementById('fl_to').value,
+      Reason: document.getElementById('fl_reason').value,
+      ApprovalStatus: document.getElementById('fl_approval').value
+    });
+    
+    await db.logAudit({ Module: 'Leave', Action: 'Created', Record: code, EmployeeCode: code });
+    await App.loadAllData();
+    App.closeModal();
+    App.navigate(State.currentPage);
+    App.showToast('Leave record added', 'success');
+  },
+
+  showAddPayroll() {
+    const months = Utils.getMonthsList(2025, 2027);
+    App.showModal('Add Payroll Record', `
+      <div class="form-grid">
+        <div class="form-group"><label>Month</label><select id="fp_month">${months.map(m => `<option value="${m.value}" ${m.value==='2026-08'?'selected':''}>${m.label}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Employee Code <span class="required">*</span></label><input type="text" id="fp_code"></div>
+        <div class="form-group"><label>Total Payroll</label><input type="number" id="fp_total" min="0"></div>
+        <div class="form-group"><label>Salary Released</label><input type="number" id="fp_released" min="0"></div>
+        <div class="form-group"><label>Salary on Hold</label><input type="number" id="fp_hold" min="0"></div>
+        <div class="form-group"><label>Deductions</label><input type="number" id="fp_deductions" min="0"></div>
+        <div class="form-group"><label>Final Settlement</label><input type="number" id="fp_settlement" min="0"></div>
+        <div class="form-group"><label>Net Salary</label><input type="number" id="fp_net" min="0"></div>
+        <div class="form-group"><label>Status</label><select id="fp_status"><option>Processed</option><option>Pending</option><option>On Hold</option></select></div>
+      </div>
+    `, `
+      <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="Forms.savePayroll()">Save</button>
+    `);
+  },
+
+  async savePayroll() {
+    const code = document.getElementById('fp_code').value.trim();
+    if (!code) { App.showToast('Employee Code required', 'error'); return; }
+    
+    await db.add(STORES.payroll, {
+      Month: document.getElementById('fp_month').value,
+      EmployeeCode: code,
+      TotalPayroll: parseFloat(document.getElementById('fp_total').value) || 0,
+      SalaryReleased: parseFloat(document.getElementById('fp_released').value) || 0,
+      SalaryOnHold: parseFloat(document.getElementById('fp_hold').value) || 0,
+      Deductions: parseFloat(document.getElementById('fp_deductions').value) || 0,
+      FinalSettlement: parseFloat(document.getElementById('fp_settlement').value) || 0,
+      NetSalary: parseFloat(document.getElementById('fp_net').value) || 0,
+      PayrollStatus: document.getElementById('fp_status').value
+    });
+    
+    await db.logAudit({ Module: 'Payroll', Action: 'Created', Record: code, EmployeeCode: code });
+    await App.loadAllData();
+    App.closeModal();
+    App.navigate(State.currentPage);
+    App.showToast('Payroll record added', 'success');
+  },
+
+  showAddRecruitment() {
+    const months = Utils.getMonthsList(2025, 2027);
+    App.showModal('Add Recruitment Record', `
+      <div class="form-grid">
+        <div class="form-group"><label>Month</label><select id="frc_month">${months.map(m => `<option value="${m.value}" ${m.value==='2026-08'?'selected':''}>${m.label}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Position <span class="required">*</span></label><input type="text" id="frc_position"></div>
+        <div class="form-group"><label>Department</label><input type="text" id="frc_dept"></div>
+        <div class="form-group"><label>Division</label><input type="text" id="frc_div"></div>
+        <div class="form-group"><label>HQ</label><input type="text" id="frc_hq"></div>
+        <div class="form-group"><label>Open Positions</label><input type="number" id="frc_open" min="0"></div>
+        <div class="form-group"><label>Applications</label><input type="number" id="frc_apps" min="0"></div>
+        <div class="form-group"><label>Interviews</label><input type="number" id="frc_interviews" min="0"></div>
+        <div class="form-group"><label>Offers Released</label><input type="number" id="frc_offers" min="0"></div>
+        <div class="form-group"><label>Offers Accepted</label><input type="number" id="frc_accepted" min="0"></div>
+        <div class="form-group"><label>Offers Declined</label><input type="number" id="frc_declined" min="0"></div>
+        <div class="form-group"><label>Status</label><select id="frc_status"><option>Open</option><option>In Progress</option><option>Filled</option><option>On Hold</option></select></div>
+      </div>
+    `, `
+      <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="Forms.saveRecruitment()">Save</button>
+    `);
+  },
+
+  async saveRecruitment() {
+    const position = document.getElementById('frc_position').value.trim();
+    if (!position) { App.showToast('Position is required', 'error'); return; }
+    
+    const offers = parseInt(document.getElementById('frc_offers').value) || 0;
+    const accepted = parseInt(document.getElementById('frc_accepted').value) || 0;
+    const declined = parseInt(document.getElementById('frc_declined').value) || 0;
+    
+    if (accepted > offers) { App.showToast('Accepted offers cannot exceed offers released', 'error'); return; }
+    if (declined > offers) { App.showToast('Declined offers cannot exceed offers released', 'error'); return; }
+    
+    await db.add(STORES.recruitment, {
+      Month: document.getElementById('frc_month').value,
+      Position: position,
+      Department: document.getElementById('frc_dept').value,
+      Division: document.getElementById('frc_div').value,
+      HQ: document.getElementById('frc_hq').value,
+      OpenPositions: parseInt(document.getElementById('frc_open').value) || 0,
+      Applications: parseInt(document.getElementById('frc_apps').value) || 0,
+      Interviews: parseInt(document.getElementById('frc_interviews').value) || 0,
+      OffersReleased: offers,
+      OffersAccepted: accepted,
+      OffersDeclined: declined,
+      Status: document.getElementById('frc_status').value
+    });
+    
+    await db.logAudit({ Module: 'Recruitment', Action: 'Created', Record: position });
+    await App.loadAllData();
+    App.closeModal();
+    App.navigate(State.currentPage);
+    App.showToast('Recruitment record added', 'success');
+  },
+
+  showAddHeadcount() {
+    const months = Utils.getMonthsList(2024, 2027);
+    App.showModal('Add Historical Headcount', `
+      <div class="form-grid">
+        <div class="form-group"><label>Month <span class="required">*</span></label><select id="fh_month">${months.map(m => `<option value="${m.value}">${m.label}</option>`).join('')}</select></div>
+        <div class="form-group"><label>Official Headcount <span class="required">*</span></label><input type="number" id="fh_count" min="0"></div>
+        <div class="form-group"><label>Department</label><input type="text" id="fh_dept"></div>
+        <div class="form-group"><label>Division</label><input type="text" id="fh_div"></div>
+        <div class="form-group"><label>HQ</label><input type="text" id="fh_hq"></div>
+        <div class="form-group"><label>Opening Headcount</label><input type="number" id="fh_opening" min="0"></div>
+        <div class="form-group"><label>Closing Headcount</label><input type="number" id="fh_closing" min="0"></div>
+      </div>
+    `, `
+      <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="Forms.saveHeadcount()">Save</button>
+    `);
+  },
+
+  async saveHeadcount() {
+    const month = document.getElementById('fh_month').value;
+    const count = parseInt(document.getElementById('fh_count').value);
+    if (!month || isNaN(count)) { App.showToast('Month and headcount required', 'error'); return; }
+    if (count < 0) { App.showToast('Headcount cannot be negative', 'error'); return; }
+    
+    await db.add(STORES.headcount, {
+      Month: month,
+      OfficialHeadcount: count,
+      Department: document.getElementById('fh_dept').value,
+      Division: document.getElementById('fh_div').value,
+      HQ: document.getElementById('fh_hq').value,
+      OpeningHeadcount: parseInt(document.getElementById('fh_opening').value) || null,
+      ClosingHeadcount: parseInt(document.getElementById('fh_closing').value) || null
+    });
+    
+    await db.logAudit({ Module: 'Headcount', Action: 'Created', Record: month });
+    await App.loadAllData();
+    App.closeModal();
+    App.navigate(State.currentPage);
+    App.showToast('Headcount record added', 'success');
+  }
+};
+
+// ==========================================
+// EXCEL EXPORT
+// ==========================================
+const ExcelExport = {
+  exportAll() {
+    const wb = XLSX.utils.book_new();
+    
+    // Employee Master
+    const empData = State.employees.map(e => ({
+      'Employee Code': e.EmployeeCode,
+      'Employee Name': e.EmployeeName,
+      'Gender': e.Gender || '',
+      'DOJ': e.DOJ || '',
+      'Division': e.Division || '',
+      'HQ': e.HQ || '',
+      'Designation': e.Designation || '',
+      'Department': e.Department || '',
+      'Level': e.Level || '',
+      'Employment Status': e.EmploymentStatus || '',
+      'Employee Type': e.EmployeeType || '',
+      'Confirmation Due Date': e.ConfirmationDueDate || '',
+      'Mobile': e.Mobile || '',
+      'Email': e.Email || '',
+      'Reporting Manager': e.ReportingManager || ''
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(empData), 'Employee Master');
+    
+    // Joining
+    const joinData = State.joining.map(j => ({
+      'Employee Code': j.EmployeeCode,
+      'Employee Name': j.EmployeeName,
+      'Designation': j.Designation || '',
+      'DOJ': j.DOJ || '',
+      'HQ': j.HQ || '',
+      'Division': j.Division || ''
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(joinData), 'Joining');
+    
+    // Resignation
+    const resData = State.resignation.map(r => ({
+      'Employee Code': r.EmployeeCode,
+      'Employee Name': r.EmployeeName,
+      'Designation': r.Designation || '',
+      'Division': r.Division || '',
+      'HQ': r.HQ || '',
+      'DOJ': r.DOJ || '',
+      'LWD': r.LWD || '',
+      'Status': r.Status || '',
+      'Tenure': r.Tenure || '',
+      'Exit Type': r.ExitType || '',
+      'Exit Reason': r.ExitReason || ''
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(resData), 'Resignation');
+    
+    // Confirmation
+    const confData = State.confirmation.map(c => ({
+      'Employee Code': c.EmployeeCode,
+      'Employee Name': c.EmployeeName,
+      'HQ': c.HQ || '',
+      'Division': c.Division || '',
+      'DOJ': c.DOJ || '',
+      'Designation': c.Designation || '',
+      'Confirmation Date': c.ConfirmationDate || ''
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(confData), 'Confirmation');
+    
+    // Attendance
+    if (State.attendance.length > 0) {
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(State.attendance.map(a => ({
+        'Month': a.Month, 'Employee Code': a.EmployeeCode,
+        'Present Days': a.PresentDays, 'Absent Days': a.AbsentDays,
+        'Late Arrivals': a.LateArrivals, 'Overtime Hours': a.OvertimeHours
+      }))), 'Attendance');
+    }
+    
+    // Leave
+    if (State.leave.length > 0) {
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(State.leave.map(l => ({
+        'Month': l.Month, 'Employee Code': l.EmployeeCode,
+        'Leave Type': l.LeaveType, 'Days': l.Days,
+        'Reason': l.Reason || '', 'Approval': l.ApprovalStatus || ''
+      }))), 'Leave');
+    }
+    
+    // Payroll
+    if (State.payroll.length > 0) {
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(State.payroll.map(p => ({
+        'Month': p.Month, 'Employee Code': p.EmployeeCode,
+        'Total Payroll': p.TotalPayroll, 'Salary Released': p.SalaryReleased,
+        'Salary On Hold': p.SalaryOnHold, 'Deductions': p.Deductions,
+        'Net Salary': p.NetSalary, 'Status': p.PayrollStatus || ''
+      }))), 'Payroll');
+    }
+    
+    // Recruitment
+    if (State.recruitment.length > 0) {
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(State.recruitment), 'Recruitment');
+    }
+    
+    // Headcount
+    if (State.headcount.length > 0) {
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(State.headcount.map(h => ({
+        'Month': h.Month, 'Official Headcount': h.OfficialHeadcount,
+        'Department': h.Department || '', 'Division': h.Division || '', 'HQ': h.HQ || ''
+      }))), 'Historical Headcount');
+    }
+    
+    // Data Dictionary
+    const dict = [
+      { Sheet: 'Employee Master', Field: 'Employee Code', Description: 'Unique employee identifier', Type: 'Text' },
+      { Sheet: 'Employee Master', Field: 'Employee Name', Description: 'Full name of employee', Type: 'Text' },
+      { Sheet: 'Employee Master', Field: 'DOJ', Description: 'Date of Joining', Type: 'Date' },
+      { Sheet: 'Employee Master', Field: 'Division', Description: 'Business division', Type: 'Text' },
+      { Sheet: 'Employee Master', Field: 'HQ', Description: 'Headquarters / Location', Type: 'Text' },
+      { Sheet: 'Employee Master', Field: 'Employment Status', Description: 'Current status: Confirmed/Probation/Promoted/Resigned/Terminated', Type: 'Text' },
+    ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dict), 'Data Dictionary');
+    
+    XLSX.writeFile(wb, `HR_Portal_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
+    App.showToast('Complete HR Excel downloaded', 'success');
+  },
+
+  exportEmployeeMaster() {
+    const wb = XLSX.utils.book_new();
+    const data = State.employees.map(e => ({
+      'Employee Code': e.EmployeeCode,
+      'Employee Name': e.EmployeeName,
+      'Gender': e.Gender || '',
+      'DOJ': e.DOJ || '',
+      'Division': e.Division || '',
+      'HQ': e.HQ || '',
+      'Designation': e.Designation || '',
+      'Employment Status': e.EmploymentStatus || '',
+      'Confirmation Due Date': e.ConfirmationDueDate || '',
+      'Employee Type': e.EmployeeType || '',
+      'Mobile': e.Mobile || '',
+      'Email': e.Email || ''
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), 'Employee Master');
+    XLSX.writeFile(wb, `Employee_Master_${new Date().toISOString().split('T')[0]}.xlsx`);
+    App.showToast('Employee Master exported', 'success');
+  },
+
+  exportSheet(type) {
+    const wb = XLSX.utils.book_new();
+    let data;
+    switch(type) {
+      case 'joining': data = State.joining; break;
+      case 'resignation': data = State.resignation; break;
+      case 'confirmation': data = State.confirmation; break;
+      case 'attendance': data = State.attendance; break;
+      case 'leave': data = State.leave; break;
+      case 'payroll': data = State.payroll; break;
+      case 'recruitment': data = State.recruitment; break;
+      case 'headcount': data = State.headcount; break;
+      default: data = [];
+    }
+    
+    if (data.length === 0) {
+      App.showToast(`No ${type} data to export`, 'warning');
+      return;
+    }
+    
+    const cleaned = data.map(d => {
+      const obj = {...d};
+      delete obj.id;
+      delete obj.SlNo;
+      return obj;
+    });
+    
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(cleaned), type.charAt(0).toUpperCase() + type.slice(1));
+    XLSX.writeFile(wb, `${type}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    App.showToast(`${type} data exported`, 'success');
+  },
+
+  exportProbation() {
+    const wb = XLSX.utils.book_new();
+    const data = State.employees.filter(e => e.EmploymentStatus === 'Probation').map(e => ({
+      'Employee Code': e.EmployeeCode,
+      'Employee Name': e.EmployeeName,
+      'DOJ': e.DOJ || '',
+      'Division': e.Division || '',
+      'HQ': e.HQ || '',
+      'Designation': e.Designation || '',
+      'Confirmation Due Date': e.ConfirmationDueDate || '',
+      'Tenure': Utils.calculateTenure(e.DOJ).text
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), 'Probation');
+    XLSX.writeFile(wb, `Probation_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+    App.showToast('Probation report exported', 'success');
+  },
+
+  exportFiltered() {
+    const emps = App.getFilteredEmployees();
+    const wb = XLSX.utils.book_new();
+    const data = emps.map(e => ({
+      'Employee Code': e.EmployeeCode,
+      'Employee Name': e.EmployeeName,
+      'Division': e.Division || '',
+      'HQ': e.HQ || '',
+      'Designation': e.Designation || '',
+      'DOJ': e.DOJ || '',
+      'Status': e.EmploymentStatus || ''
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), 'Filtered Data');
+    XLSX.writeFile(wb, `Filtered_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
+    App.showToast(`${emps.length} filtered records exported`, 'success');
+  },
+
+  exportDataHealth() {
+    const wb = XLSX.utils.book_new();
+    const data = [
+      { Module: 'Employee Master', Status: 'Available', Completeness: '82%', Records: State.employees.length },
+      { Module: 'Joining', Status: 'Available', Completeness: '100%', Records: State.joining.length },
+      { Module: 'Resignation', Status: 'Available', Completeness: '100%', Records: State.resignation.length },
+      { Module: 'Confirmation', Status: 'Available', Completeness: '100%', Records: State.confirmation.length },
+      { Module: 'Attendance', Status: State.attendance.length > 0 ? 'Available' : 'Awaiting HR Data', Completeness: State.attendance.length > 0 ? 'Partial' : '0%', Records: State.attendance.length },
+      { Module: 'Leave', Status: State.leave.length > 0 ? 'Available' : 'Awaiting HR Data', Completeness: State.leave.length > 0 ? 'Partial' : '0%', Records: State.leave.length },
+      { Module: 'Payroll', Status: State.payroll.length > 0 ? 'Available' : 'Awaiting HR Data', Completeness: State.payroll.length > 0 ? 'Partial' : '0%', Records: State.payroll.length },
+      { Module: 'Recruitment', Status: State.recruitment.length > 0 ? 'Available' : 'Awaiting HR Data', Completeness: State.recruitment.length > 0 ? 'Partial' : '0%', Records: State.recruitment.length },
+      { Module: 'Historical Headcount', Status: State.headcount.length > 0 ? 'Available' : 'Awaiting HR Data', Completeness: State.headcount.length > 0 ? 'Partial' : '0%', Records: State.headcount.length },
+    ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), 'Data Health');
+    XLSX.writeFile(wb, `Data_Health_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+    App.showToast('Data health report exported', 'success');
+  }
+};
+
+// ==========================================
+// IMPORT HANDLER
+// ==========================================
+const ImportHandler = {
+  async handleFile(file) {
+    if (!file) return;
+    
+    App.showToast('Reading Excel file...', 'info');
+    
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, { type: 'array' });
+        
+        const preview = document.getElementById('importPreview');
+        let html = '<div class="card mb-4"><div class="card-header"><div class="card-title">📋 Import Preview</div></div><div class="card-body">';
+        
+        html += `<p style="margin-bottom:16px;"><strong>File:</strong> ${file.name} · <strong>Sheets:</strong> ${wb.SheetNames.join(', ')}</p>`;
+        
+        let totalNew = 0, totalExisting = 0, totalRecords = 0;
+        
+        for (const sheetName of wb.SheetNames) {
+          const ws = wb.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(ws, { defval: '' });
+          totalRecords += jsonData.length;
+          
+          // Detect employee codes
+          const codeField = Object.keys(jsonData[0] || {}).find(k => k.toLowerCase().includes('employee') && k.toLowerCase().includes('code')) || 
+                           Object.keys(jsonData[0] || {}).find(k => k.toLowerCase().includes('sl.no') || k.toLowerCase().includes('sl no'));
+          
+          let newCount = 0, existingCount = 0;
+          if (codeField) {
+            for (const row of jsonData) {
+              const code = String(row[codeField]).trim();
+              if (code.startsWith('PRI')) {
+                const exists = State.employees.find(e => e.EmployeeCode === code);
+                if (exists) existingCount++; else newCount++;
+              }
+            }
+          }
+          totalNew += newCount;
+          totalExisting += existingCount;
+          
+          html += `
+            <div style="margin-bottom:16px;">
+              <h4 style="margin-bottom:8px;">${sheetName} <span class="section-badge">${jsonData.length} rows</span></h4>
+              <div style="display:flex;gap:12px;margin-bottom:8px;">
+                <span style="font-size:12px;color:var(--success);">✅ ${newCount} new</span>
+                <span style="font-size:12px;color:var(--warning);">⚠️ ${existingCount} existing</span>
+              </div>
+              ${jsonData.length > 0 ? `
+                <div class="data-table-wrapper" style="max-height:200px;overflow:auto;">
+                  <table class="data-table">
+                    <thead><tr>${Object.keys(jsonData[0]).slice(0,8).map(k => `<th>${k}</th>`).join('')}</tr></thead>
+                    <tbody>${jsonData.slice(0,5).map(r => `<tr>${Object.keys(jsonData[0]).slice(0,8).map(k => `<td>${r[k]||''}</td>`).join('')}</tr>`).join('')}</tbody>
+                  </table>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }
+        
+        html += `
+          <div style="background:var(--bg-tertiary);padding:16px;border-radius:var(--radius-md);margin-top:16px;">
+            <h4 style="margin-bottom:8px;">Import Summary</h4>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center;">
+              <div><div style="font-size:20px;font-weight:700;color:var(--brand-primary);">${totalRecords}</div><div style="font-size:11px;color:var(--text-tertiary);">Total Records</div></div>
+              <div><div style="font-size:20px;font-weight:700;color:var(--success);">${totalNew}</div><div style="font-size:11px;color:var(--text-tertiary);">New Records</div></div>
+              <div><div style="font-size:20px;font-weight:700;color:var(--warning);">${totalExisting}</div><div style="font-size:11px;color:var(--text-tertiary);">Existing Records</div></div>
+              <div><div style="font-size:20px;font-weight:700;color:var(--text-tertiary);">0</div><div style="font-size:11px;color:var(--text-tertiary);">Invalid Records</div></div>
+            </div>
+          </div>
+        `;
+        
+        html += '</div><div class="card-body" style="border-top:1px solid var(--border-light);display:flex;gap:8px;justify-content:flex-end;">';
+        html += '<button class="btn btn-outline" onclick="document.getElementById(\'importPreview\').innerHTML=\'\'">Cancel</button>';
+        html += `<button class="btn btn-primary" onclick="ImportHandler.executeImport()">Import Data</button>`;
+        html += '</div></div>';
+        
+        preview.innerHTML = html;
+        
+        // Store parsed data for import
+        window._importData = { wb, file };
+        
+      } catch(err) {
+        App.showToast('Error reading file: ' + err.message, 'error');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  },
+
+  async executeImport() {
+    if (!window._importData) return;
+    
+    App.showToast('Importing data...', 'info');
+    
+    try {
+      const wb = window._importData.wb;
+      let importCount = 0;
+      
+      for (const sheetName of wb.SheetNames) {
+        const ws = wb.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(ws, { defval: '' });
+        
+        const sn = sheetName.toLowerCase();
+        
+        if (sn.includes('employee') || sn.includes('master')) {
+          for (const row of jsonData) {
+            const code = row['Employee Code'] || row['EmployeeCode'] || '';
+            if (code && code.startsWith('PRI')) {
+              const existing = await db.get(STORES.employees, code);
+              if (!existing) {
+                await db.put(STORES.employees, {
+                  EmployeeCode: code,
+                  EmployeeName: row['Employee Name'] || row['EmployeeName'] || '',
+                  Division: row['Division'] || '',
+                  HQ: row['HQ'] || '',
+                  Designation: row['Designation'] || '',
+                  EmploymentStatus: row['Employment Status'] || row['Status'] || 'Probation',
+                  DOJ: row['DOJ'] || '',
+                  ConfirmationDueDate: row['Confirmation Due Date'] || '',
+                  Gender: row['Gender'] || '',
+                  Department: row['Department'] || '',
+                  Level: row['Level'] || '',
+                  EmployeeType: row['Employee Type'] || 'Full Time',
+                  Mobile: row['Mobile'] || '',
+                  Email: row['Email'] || '',
+                  ReportingManager: row['Reporting Manager'] || '',
+                  CreatedAt: new Date().toISOString(),
+                  UpdatedAt: new Date().toISOString()
+                });
+                importCount++;
+              }
+            }
+          }
+        }
+      }
+      
+      await db.logAudit({ Module: 'Import', Action: 'Data Imported', Record: window._importData.file.name, Field: '', OldValue: '', NewValue: `${importCount} records imported` });
+      
+      await App.loadAllData();
+      document.getElementById('importPreview').innerHTML = `
+        <div class="card"><div class="card-body text-center">
+          <div style="font-size:48px;margin-bottom:16px;">✅</div>
+          <h3>Import Complete</h3>
+          <p style="color:var(--text-tertiary);">${importCount} new records imported successfully.</p>
+          <button class="btn btn-primary mt-3" onclick="App.navigate('overview')">Go to Dashboard</button>
+        </div></div>
+      `;
+      
+      App.showToast(`Import complete: ${importCount} records imported`, 'success');
+      
+    } catch(err) {
+      App.showToast('Import error: ' + err.message, 'error');
+    }
+  }
+};
+
+// ==========================================
+// MASTER DATA MANAGEMENT
+// ==========================================
+const MasterData = {
+  async addItem(category) {
+    const input = document.getElementById(`newItem_${category}`);
+    const value = input.value.trim();
+    if (!value) return;
+    
+    const data = await db.get(STORES.masterData, category);
+    if (data && data.values.includes(value)) {
+      App.showToast('Value already exists', 'warning');
+      return;
+    }
+    
+    const values = data ? [...data.values, value].sort() : [value];
+    await db.put(STORES.masterData, { category, values });
+    
+    await db.logAudit({ Module: 'Master Data', Action: 'Added', Record: category, Field: '', OldValue: '', NewValue: value });
+    
+    input.value = '';
+    Pages.loadMasterDataSettings();
+    App.showToast(`Added "${value}" to ${category}`, 'success');
+  },
+
+  async removeItem(category, index) {
+    const data = await db.get(STORES.masterData, category);
+    if (!data) return;
+    
+    const removed = data.values.splice(index, 1);
+    await db.put(STORES.masterData, data);
+    
+    await db.logAudit({ Module: 'Master Data', Action: 'Removed', Record: category, Field: '', OldValue: removed[0], NewValue: '' });
+    
+    Pages.loadMasterDataSettings();
+    App.showToast(`Removed from ${category}`, 'success');
+  }
+};
+
+// ==========================================
+// CLICK OUTSIDE SEARCH
+// ==========================================
+document.addEventListener('click', (e) => {
+  const sr = document.getElementById('searchResults');
+  const si = document.getElementById('globalSearch');
+  if (sr && !sr.contains(e.target) && e.target !== si) {
+    sr.style.display = 'none';
+  }
+});
+
+// ==========================================
+// RESPONSIVE SIDEBAR
+// ==========================================
+window.addEventListener('resize', () => {
+  const toggle = document.getElementById('sidebarToggle');
+  if (window.innerWidth <= 1024) {
+    toggle.style.display = '';
+  } else {
+    toggle.style.display = 'none';
+    document.getElementById('sidebar').classList.remove('open');
+  }
+});
+
+// Check on load
+if (window.innerWidth <= 1024) {
+  document.getElementById('sidebarToggle').style.display = '';
+}
+
+// ==========================================
+// INITIALIZE
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+  App.init();
+});
+</script>
+</body>
+</html>
