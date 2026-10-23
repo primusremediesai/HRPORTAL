@@ -6,11 +6,22 @@
   <title>Primus HR Management Portal — Intelligence Dashboard</title>
   <meta name="description" content="Enterprise HR Management Portal with BI Dashboard, Employee Directory, Analytics and Reporting">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/ess-styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="js/ess/ess-core.js"></script>
+<script src="js/ess/ess-remote.js"></script>
   <script src="js/database.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/export_standalone.js"></script>
+  <script src="js/ess/ess-face.js"></script>
+  <script src="js/ess/ess-attendance.js"></script>
+  <script src="js/ess/ess-leave.js"></script>
+  <script src="js/ess/ess-calendar.js"></script>
+  <script src="js/ess/ess-expense.js"></script>
+  <script src="js/ess/ess-documents.js"></script>
+  <script src="js/ess/ess-approvals.js"></script>
+  <script src="js/ess/ess-ui.js"></script>
 </head>
 <body>
   <div class="app-container" id="app">
@@ -21,6 +32,35 @@
         <div class="sidebar-brand">Primus HR<span>Management Portal</span></div>
       </div>
       <div class="sidebar-nav">
+        <div class="nav-section-label ess-section" style="display:none">Self Service (ESS)</div>
+        <div class="nav-item ess-item" style="display:none" data-page="ess-dashboard" onclick="App.navigate('ess-dashboard')">
+          <span class="nav-icon">🏠</span> My Dashboard
+        </div>
+        <div class="nav-item ess-item" style="display:none" data-page="ess-attendance" onclick="App.navigate('ess-attendance')">
+          <span class="nav-icon">⏱️</span> Attendance & Clock
+        </div>
+        <div class="nav-item ess-item" style="display:none" data-page="ess-leave" onclick="App.navigate('ess-leave')">
+          <span class="nav-icon">🏖️</span> Leave Management
+        </div>
+        <div class="nav-item ess-item" style="display:none" data-page="ess-calendar" onclick="App.navigate('ess-calendar')">
+          <span class="nav-icon">📅</span> Holidays & Calendar
+        </div>
+        <div class="nav-item ess-item" style="display:none" data-page="ess-expenses" onclick="App.navigate('ess-expenses')">
+          <span class="nav-icon">💳</span> My Expenses
+        </div>
+        <div class="nav-item ess-item" style="display:none" data-page="ess-documents" onclick="App.navigate('ess-documents')">
+          <span class="nav-icon">📁</span> Document Vault
+        </div>
+        <div class="nav-item ess-item" style="display:none" data-page="ess-notifications" onclick="App.navigate('ess-notifications')">
+          <span class="nav-icon">🔔</span> Notifications
+        </div>
+        <div class="nav-item ess-item" style="display:none" data-page="ess-approvals" onclick="App.navigate('ess-approvals')">
+          <span class="nav-icon">✅</span> Approvals Centre
+        </div>
+        <div class="nav-item ess-item" style="display:none" data-page="ess-settings" onclick="App.navigate('ess-settings')">
+          <span class="nav-icon">🛡️</span> ESS Settings & Audit
+        </div>
+
         <div class="nav-section-label">Analytics</div>
         <div class="nav-item active" data-page="overview" onclick="App.navigate('overview')">
           <span class="nav-icon">📊</span> Executive Overview
@@ -77,14 +117,11 @@
         <div class="nav-item" data-page="import" onclick="App.navigate('import')">
           <span class="nav-icon">📥</span> Data Import
         </div>
+        <div class="nav-item" data-page="storage" onclick="App.navigate('storage')">
+          <span class="nav-icon">☁️</span> Cloud Storage (5 TB)
+        </div>
         <div class="nav-item" data-page="settings" onclick="App.navigate('settings')">
           <span class="nav-icon">⚙️</span> Master Data / Settings
-        </div>
-      </div>
-      
-      <div style="margin-top: auto; padding: 20px; border-top: 1px solid var(--border);">
-        <div class="nav-item" onclick="App.logout()">
-          <span class="nav-icon">🚪</span> Sign Out
         </div>
       </div>
     </nav>
@@ -102,15 +139,38 @@
         <div class="header-actions">
           <div class="header-snapshot" id="snapshotDate">Data as on: 20 Aug 2026</div>
           <button class="header-btn" title="Refresh" onclick="App.refreshData()">🔄</button>
-          <button class="header-btn" title="Notifications">
-            🔔
-            <span class="badge-dot"></span>
-          </button>
-          <div class="header-user">
-            <div class="header-user-avatar">HR</div>
+          <div class="header-notif-wrap" style="position:relative;display:inline-block;" id="headerNotifWrapper">
+            <button class="header-btn" id="headerNotifBtn" title="Notifications & Approvals" onclick="App.toggleNotificationMenu(event)">
+              🔔
+              <span class="badge-dot" id="headerNotifDot" style="display:none;"></span>
+            </button>
+            <div id="headerNotificationDropdown" style="display:none;position:absolute;top:48px;right:0;background:var(--bg-secondary);border:1px solid var(--border-light);border-radius:var(--radius-md);box-shadow:var(--shadow-lg);width:380px;max-width:92vw;z-index:1001;overflow:hidden;">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border-light);background:var(--bg-tertiary);">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:16px;">🔔</span>
+                  <span style="font-weight:700;font-size:13px;color:var(--text-primary);">Notifications &amp; Approvals</span>
+                  <span id="notifBadgePill" style="display:none;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--accent-primary,#0e8a5f);color:#fff;">0</span>
+                </div>
+                <button class="btn btn-sm" onclick="App.refreshNotifications(event)" title="Refresh" style="padding:2px 8px;font-size:12px;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);">🔄</button>
+              </div>
+              <div id="notifDropdownBody" style="max-height:360px;overflow-y:auto;padding:8px 0;">
+                <div style="padding:16px;text-align:center;color:var(--text-muted);font-size:13px;">Loading notifications…</div>
+              </div>
+              <div style="padding:10px 16px;border-top:1px solid var(--border-light);background:var(--bg-tertiary);text-align:center;font-size:12px;">
+                <a href="javascript:void(0)" onclick="App.navigate('probation'); document.getElementById('headerNotificationDropdown').style.display='none';" style="color:var(--accent-primary,#0e8a5f);text-decoration:none;font-weight:600;">View Probation Reviews &rarr;</a>
+              </div>
+            </div>
+          </div>
+          <div class="header-user" id="headerUserDropdown" style="cursor:pointer;position:relative;" onclick="App.toggleUserMenu()">
+            <div class="header-user-avatar" id="userAvatarText">HR</div>
             <div class="header-user-info">
-              <div class="name">HR Admin</div>
-              <div class="role">Administrator</div>
+              <div class="name" id="userNameText">HR Admin</div>
+              <div class="role" id="userRoleText">Administrator</div>
+            </div>
+            <div id="userMenuDropdown" style="display:none;position:absolute;top:48px;right:0;background:var(--bg-secondary);border:1px solid var(--border-light);border-radius:var(--radius-md);box-shadow:var(--shadow-lg);min-width:180px;z-index:1000;overflow:hidden;">
+              <div style="padding:10px 14px;border-bottom:1px solid var(--border-light);font-size:12px;color:var(--text-tertiary);" id="userEmailText">admin@primus.local</div>
+              <a href="javascript:void(0)" onclick="App.navigate('storage')" style="display:flex;align-items:center;gap:8px;padding:10px 14px;color:var(--text-primary);text-decoration:none;font-size:13px;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='transparent'">📁 Cloud Storage</a>
+              <a href="javascript:void(0)" onclick="App.logout()" style="display:flex;align-items:center;gap:8px;padding:10px 14px;color:var(--danger, #ef4444);text-decoration:none;font-size:13px;border-top:1px solid var(--border-light);" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='transparent'">🚪 Sign Out</a>
             </div>
           </div>
         </div>
@@ -179,15 +239,42 @@ const State = {
 // APP CONTROLLER
 // ==========================================
 const App = {
-  logout() {
-    fetch('/api/auth/logout', { method: 'POST' })
-      .then(() => { window.location.href = '/login.html'; })
-      .catch(console.error);
-  },
   async init() {
-    // Server-side auth ensures this page is only accessible if authenticated
+    // Authentication Check — accept both client-side sessionStorage and server-side session auth
+    const isServerServed = window.location.protocol === 'http:' || window.location.protocol === 'https:';
+    if (!isServerServed && sessionStorage.getItem('isAuthenticated') !== 'true') {
+      window.location.href = 'login.html';
+      return;
+    }
+    // If served via server, the auth middleware already verified the session
 
     try {
+      // Fetch authenticated user info
+      let userRole = 'admin';
+      try {
+        const meRes = await fetch('/api/auth/me');
+        if (meRes.ok) {
+          const meData = await meRes.json();
+          State.currentUser = meData.user;
+          userRole = meData.user.role || 'admin';
+          
+          // Update Header with logged-in user profile
+          const userNameEl = document.getElementById('userNameText');
+          const userRoleEl = document.getElementById('userRoleText');
+          const userAvatarEl = document.getElementById('userAvatarText');
+          const userEmailEl = document.getElementById('userEmailText');
+
+          if (userNameEl) userNameEl.textContent = meData.user.name || 'User';
+          if (userRoleEl) userRoleEl.textContent = userRole === 'admin' ? 'Administrator' : (userRole === 'employee' ? 'Employee (Selfcare)' : 'HR Manager');
+          if (userEmailEl) userEmailEl.textContent = meData.user.email || meData.user.employeeCode || '';
+          if (userAvatarEl && meData.user.name) {
+            userAvatarEl.textContent = meData.user.name.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+          }
+        }
+      } catch (err) {
+        console.warn('Could not fetch user session profile:', err);
+      }
+
       await db.init();
       const empCount = await db.count(STORES.employees);
       if (empCount === 0) {
@@ -195,7 +282,43 @@ const App = {
       }
       await this.loadAllData();
       this.initMasterData();
-      this.navigate('overview');
+
+      // Initialize ESS Subsystem
+      if (typeof ESS !== 'undefined' && ESS.UI) {
+        await ESS.UI.mount();
+      }
+
+      // Configure roles & persona
+      if (userRole === 'employee') {
+        const empCode = State.currentUser?.employeeCode || 'PRI014';
+        if (typeof ESS !== 'undefined' && ESS.Auth) {
+          ESS.Auth.signIn(empCode, 'employee');
+          if (ESS.UI && ESS.UI.renderTopBar) ESS.UI.renderTopBar();
+          if (ESS.Remote && ESS.Remote.startAutoSync) ESS.Remote.startAutoSync();
+        }
+        this.applyRoleRestrictions('employee');
+        const hash = window.location.hash ? window.location.hash.replace('#', '') : '';
+        this.navigate(hash && hash.startsWith('ess-') ? hash : 'ess-dashboard');
+      } else {
+        if (typeof ESS !== 'undefined' && ESS.Auth) {
+          ESS.Auth.signIn('HR-ADMIN', 'admin');
+        }
+        this.applyRoleRestrictions('admin');
+        const hash = window.location.hash ? window.location.hash.replace('#', '') : '';
+        this.navigate(hash && !hash.startsWith('ess-') ? hash : 'overview');
+        this.refreshNotifications();
+        if (!this._notifInterval) {
+          this._notifInterval = setInterval(() => this.refreshNotifications(), 30000);
+        }
+      }
+
+      window.addEventListener('hashchange', () => {
+        const hp = window.location.hash ? window.location.hash.replace('#', '') : '';
+        if (hp && hp !== State.currentPage) {
+          App.navigate(hp);
+        }
+      });
+
       this.showToast('HR Portal initialized successfully', 'success');
     } catch(err) {
       console.error('Init error:', err);
@@ -341,7 +464,18 @@ const App = {
       'data-entry': 'Monthly HR Data Entry',
       'reports': 'Reports & Excel Export',
       'import': 'Data Import',
-      'settings': 'Master Data / Settings'
+      'storage': 'Cloud Storage & Documents (5 TB)',
+      'selfcare': 'Employee Self-Service — My Dashboard',
+      'settings': 'Master Data / Settings',
+      'ess-dashboard': 'Employee Self-Service — My Dashboard',
+      'ess-attendance': 'Employee Self-Service — Attendance & Clock',
+      'ess-leave': 'Employee Self-Service — Leave Management',
+      'ess-calendar': 'Employee Self-Service — Holidays & Calendar',
+      'ess-expenses': 'Employee Self-Service — Expense Claims',
+      'ess-documents': 'Employee Self-Service — Document Vault',
+      'ess-notifications': 'Employee Self-Service — Notifications',
+      'ess-approvals': 'Employee Self-Service — Approvals Centre',
+      'ess-settings': 'Employee Self-Service — ESS Settings & Audit'
     };
     document.getElementById('headerBreadcrumb').textContent = pageNames[page] || page;
     
@@ -367,7 +501,18 @@ const App = {
       'data-entry': () => Pages.renderDataEntry(),
       'reports': () => Pages.renderReports(),
       'import': () => Pages.renderImport(),
-      'settings': () => Pages.renderSettings()
+      'storage': () => Pages.renderStorage(),
+      'selfcare': () => ESS.UI.renderDashboard(document.getElementById('contentArea')),
+      'settings': () => Pages.renderSettings(),
+      'ess-dashboard': () => ESS.UI.renderDashboard(document.getElementById('contentArea')),
+      'ess-attendance': () => ESS.UI.renderAttendance(document.getElementById('contentArea')),
+      'ess-leave': () => ESS.UI.renderLeave(document.getElementById('contentArea')),
+      'ess-calendar': () => ESS.UI.renderCalendar(document.getElementById('contentArea')),
+      'ess-expenses': () => ESS.UI.renderExpenses(document.getElementById('contentArea')),
+      'ess-documents': () => ESS.UI.renderDocuments(document.getElementById('contentArea')),
+      'ess-notifications': () => ESS.UI.renderNotifications(document.getElementById('contentArea')),
+      'ess-approvals': () => ESS.UI.renderApprovals(document.getElementById('contentArea')),
+      'ess-settings': () => ESS.UI.renderSettings(document.getElementById('contentArea'))
     };
 
     // Destroy existing charts
@@ -375,9 +520,64 @@ const App = {
     State.charts = {};
 
     if (renderers[page]) renderers[page]();
+
+    // Re-apply role restrictions so sidebar state remains strictly enforced
+    const userRole = State.currentUser?.role || 'admin';
+    this.applyRoleRestrictions(userRole);
+
+    if (typeof ESS !== 'undefined' && ESS.UI && ESS.UI.renderBottomNav) {
+      if (userRole === 'employee' || page.startsWith('ess-')) {
+        ESS.UI.renderBottomNav();
+      } else {
+        const bnav = document.getElementById('essBottomNav');
+        if (bnav) bnav.style.display = 'none';
+      }
+    }
     
     // Scroll to top
     document.getElementById('contentArea').scrollTop = 0;
+  },
+
+  applyRoleRestrictions(role) {
+    if (role === 'employee') {
+      // Hide all admin nav sections and items
+      document.querySelectorAll('.sidebar-nav .nav-section-label:not(.ess-section)').forEach(label => {
+        label.style.display = 'none';
+      });
+      document.querySelectorAll('.sidebar-nav .nav-item:not(.ess-item)').forEach(item => {
+        item.style.display = 'none';
+      });
+      // Show only ESS section and items
+      document.querySelectorAll('.sidebar-nav .ess-section, .sidebar-nav .ess-item').forEach(el => {
+        el.style.display = '';
+      });
+      // Show ESS top bar and bottom nav in ESS UI
+      const bar = document.getElementById('essTopBar');
+      if (bar) bar.style.display = '';
+      const bnav = document.getElementById('essBottomNav');
+      if (bnav) bnav.style.display = '';
+      const switcher = document.querySelector('.ess-switcher-select');
+      if (switcher) switcher.style.display = 'none';
+      const switcherLabel = document.querySelector('#essTopBar label');
+      if (switcherLabel) switcherLabel.style.display = 'none';
+    } else {
+      // Admin UI (HR): Show all standard HR admin sections and items
+      document.querySelectorAll('.sidebar-nav .nav-section-label:not(.ess-section)').forEach(label => {
+        label.style.display = '';
+      });
+      document.querySelectorAll('.sidebar-nav .nav-item:not(.ess-item)').forEach(item => {
+        item.style.display = '';
+      });
+      // Remove / completely hide ESS section and all ESS items from Admin UI
+      document.querySelectorAll('.sidebar-nav .ess-section, .sidebar-nav .ess-item').forEach(el => {
+        el.style.display = 'none';
+      });
+      // Remove ESS top persona switcher bar from Admin UI
+      const bar = document.getElementById('essTopBar');
+      if (bar) bar.style.display = 'none';
+      const bnav = document.getElementById('essBottomNav');
+      if (bnav) bnav.style.display = 'none';
+    }
   },
 
   async refreshData() {
@@ -659,9 +859,57 @@ const Pages = {
     const confirmed = emps.filter(e => e.EmploymentStatus === 'Confirmed');
     const promoted = emps.filter(e => e.EmploymentStatus === 'Promoted');
     
-    const totalJoining = State.joining.length;
-    const totalResignation = State.resignation.length;
-    const confirmationsCount = State.confirmation.length;
+    // Apply division filter to joining, resignation, and confirmation data
+    const f = State.filters;
+    let filteredJoining = [...State.joining];
+    let filteredResignation = [...State.resignation];
+    let filteredConfirmation = [...State.confirmation];
+    
+    if (f.division) {
+      filteredJoining = filteredJoining.filter(j => j.Division === f.division);
+      filteredResignation = filteredResignation.filter(r => r.Division === f.division);
+      filteredConfirmation = filteredConfirmation.filter(c => c.Division === f.division);
+    }
+    if (f.hq) {
+      filteredJoining = filteredJoining.filter(j => j.HQ === f.hq);
+      filteredResignation = filteredResignation.filter(r => r.HQ === f.hq);
+      filteredConfirmation = filteredConfirmation.filter(c => c.HQ === f.hq);
+    }
+    if (f.designation) {
+      filteredJoining = filteredJoining.filter(j => j.Designation === f.designation);
+      filteredResignation = filteredResignation.filter(r => r.Designation === f.designation);
+      filteredConfirmation = filteredConfirmation.filter(c => c.Designation === f.designation);
+    }
+    
+    const totalJoining = filteredJoining.length;
+    const totalResignation = filteredResignation.length;
+    const confirmationsCount = filteredConfirmation.length;
+    
+    // Also filter attendance, payroll, recruitment by division when data exists
+    let filteredAttendance = [...State.attendance];
+    let filteredPayroll = [...State.payroll];
+    let filteredRecruitment = [...State.recruitment];
+    if (f.division) {
+      filteredAttendance = filteredAttendance.filter(a => a.Division === f.division);
+      filteredPayroll = filteredPayroll.filter(p => p.Division === f.division);
+      filteredRecruitment = filteredRecruitment.filter(r => r.Division === f.division);
+    }
+    
+    // Compute KPIs for Open Positions, Attendance %, Total Payroll from filtered data
+    const openPositions = filteredRecruitment.filter(r => r.Status === 'Open' || r.RecruitmentStatus === 'Open').length;
+    const hasRecruitmentData = State.recruitment.length > 0;
+    
+    const attendanceRecords = filteredAttendance.filter(a => a.PresentDays !== undefined && a.TotalDays !== undefined);
+    const hasAttendanceData = State.attendance.length > 0;
+    let attendancePct = 0;
+    if (attendanceRecords.length > 0) {
+      const totalPresent = attendanceRecords.reduce((sum, a) => sum + (parseFloat(a.PresentDays) || 0), 0);
+      const totalDays = attendanceRecords.reduce((sum, a) => sum + (parseFloat(a.TotalDays) || 0), 0);
+      attendancePct = totalDays > 0 ? (totalPresent / totalDays * 100) : 0;
+    }
+    
+    const hasPayrollData = State.payroll.length > 0;
+    const totalPayrollAmt = filteredPayroll.reduce((sum, p) => sum + (parseFloat(p.GrossSalary) || parseFloat(p.NetSalary) || parseFloat(p.TotalSalary) || parseFloat(p.Amount) || 0), 0);
     
     // Division counts
     const divCounts = Utils.countBy(active, 'Division');
@@ -676,23 +924,23 @@ const Pages = {
       tenureBrackets[b] = (tenureBrackets[b] || 0) + 1;
     });
     
-    // Monthly joining from data
+    // Monthly joining from filtered data
     const joiningByMonth = {};
-    State.joining.forEach(j => {
+    filteredJoining.forEach(j => {
       const mk = Utils.getMonthKey(j.DOJ);
       if (mk) joiningByMonth[mk] = (joiningByMonth[mk] || 0) + 1;
     });
     
-    // Monthly exits
+    // Monthly exits from filtered data
     const exitsByMonth = {};
-    State.resignation.forEach(r => {
+    filteredResignation.forEach(r => {
       const mk = Utils.getMonthKey(r.LWD);
       if (mk) exitsByMonth[mk] = (exitsByMonth[mk] || 0) + 1;
     });
     
-    // Exits by division
-    const exitsByDiv = Utils.countBy(State.resignation, 'Division');
-    const exitsByHQ = Utils.countBy(State.resignation, 'HQ');
+    // Exits by division from filtered data
+    const exitsByDiv = Utils.countBy(filteredResignation, 'Division');
+    const exitsByHQ = Utils.countBy(filteredResignation, 'HQ');
 
     // Attrition rate
     const attritionRate = active.length > 0 ? (totalResignation / (active.length + totalResignation) * 100) : 0;
@@ -754,20 +1002,23 @@ const Pages = {
           <div class="kpi-value">${confirmationsCount}</div>
           <div class="kpi-change neutral">Confirmed this period</div>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card" onclick="App.navigate('recruitment')">
           <div class="kpi-icon blue">🎯</div>
           <div class="kpi-label">Open Positions</div>
-          <div class="kpi-value awaiting">Awaiting HR Data</div>
+          <div class="kpi-value ${hasRecruitmentData ? '' : 'awaiting'}">${hasRecruitmentData ? openPositions : 'Awaiting HR Data'}</div>
+          ${hasRecruitmentData ? '<div class="kpi-change neutral">Active openings</div>' : ''}
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card" onclick="App.navigate('attendance')">
           <div class="kpi-icon blue">📅</div>
           <div class="kpi-label">Attendance %</div>
-          <div class="kpi-value awaiting">Awaiting HR Data</div>
+          <div class="kpi-value ${hasAttendanceData ? '' : 'awaiting'}">${hasAttendanceData ? Utils.formatPercent(attendancePct) : 'Awaiting HR Data'}</div>
+          ${hasAttendanceData ? '<div class="kpi-change neutral">Average attendance</div>' : ''}
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card" onclick="App.navigate('payroll')">
           <div class="kpi-icon blue">💰</div>
           <div class="kpi-label">Total Payroll</div>
-          <div class="kpi-value awaiting">Awaiting HR Data</div>
+          <div class="kpi-value ${hasPayrollData ? '' : 'awaiting'}">${hasPayrollData ? '₹' + Utils.formatNumber(totalPayrollAmt) : 'Awaiting HR Data'}</div>
+          ${hasPayrollData ? '<div class="kpi-change neutral">Total compensation</div>' : ''}
         </div>
       </div>
 
@@ -961,12 +1212,12 @@ const Pages = {
         <div class="section-title"><span class="section-icon">💡</span> Management Insights</div>
       </div>
       <div style="margin-bottom:20px;">
-        ${this.generateInsights(active, State.resignation, divCounts, hqCounts, probation)}
+        ${this.generateInsights(active, filteredResignation, divCounts, hqCounts, probation)}
       </div>
     `;
 
     // Render charts
-    this.renderOverviewCharts(divCounts, hqCounts, desCounts, statusCounts, tenureBrackets, joiningByMonth, exitsByMonth, exitsByDiv, exitsByHQ);
+    this.renderOverviewCharts(divCounts, hqCounts, desCounts, statusCounts, tenureBrackets, joiningByMonth, exitsByMonth, exitsByDiv, exitsByHQ, filteredConfirmation);
   },
 
   generateInsights(active, resignations, divCounts, hqCounts, probation) {
@@ -1010,7 +1261,7 @@ const Pages = {
     `).join('');
   },
 
-  renderOverviewCharts(divCounts, hqCounts, desCounts, statusCounts, tenureBrackets, joiningByMonth, exitsByMonth, exitsByDiv, exitsByHQ) {
+  renderOverviewCharts(divCounts, hqCounts, desCounts, statusCounts, tenureBrackets, joiningByMonth, exitsByMonth, exitsByDiv, exitsByHQ, filteredConfirmation) {
     // Hires vs Exits
     const allMonths = [...new Set([...Object.keys(joiningByMonth), ...Object.keys(exitsByMonth)])].sort();
     App.createChart('chartHiresExits', {
@@ -1099,9 +1350,9 @@ const Pages = {
       options: { indexAxis: 'y', plugins: { legend: { display: false } } }
     });
 
-    // Confirmation by month
+    // Confirmation by month (uses filtered data)
     const confByMonth = {};
-    State.confirmation.forEach(c => {
+    (filteredConfirmation || State.confirmation).forEach(c => {
       const mk = Utils.getMonthKey(c.ConfirmationDate);
       if (mk) confByMonth[mk] = (confByMonth[mk] || 0) + 1;
     });
@@ -1288,7 +1539,8 @@ const Pages = {
         <div class="tab" onclick="ProfileTabs.switchTab('payroll')">Payroll</div>
         <div class="tab" onclick="ProfileTabs.switchTab('joining')">Joining</div>
         <div class="tab" onclick="ProfileTabs.switchTab('resignation')">Resignation</div>
-        <div class="tab" onclick="ProfileTabs.switchTab('activity')">Activity History</div>
+        <div class="tab" onclick="ProfileTabs.switchTab('documents')">Documents</div>
+          <div class="tab" onclick="ProfileTabs.switchTab('activity')">Activity History</div>
       </div>
 
       <div class="card mt-3">
@@ -2138,6 +2390,337 @@ const Pages = {
     
     grid.innerHTML = html;
   }
+,
+
+async renderStorage() {
+    const content = document.getElementById('contentArea');
+    content.innerHTML = `
+      <div style="margin-bottom: 24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+          <div>
+            <h2 style="margin:0;font-size:22px;color:var(--text-primary);display:flex;align-items:center;gap:10px;">
+              <span>☁️</span> Cloud Storage & Document Hub
+            </h2>
+            <p style="margin:4px 0 0;color:var(--text-tertiary);font-size:14px;">
+              5 TB Google Cloud / AI Pro quota connected. Upload and view discriminated records.
+            </p>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-primary" onclick="StorageManager.showUploadModal()" style="display:flex;align-items:center;gap:8px;">
+              <span>⬆️</span> Upload Document
+            </button>
+            <button class="btn btn-secondary" onclick="StorageManager.refreshFiles()">
+              <span>🔄</span> Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATUS & QUOTA BANNER -->
+      <div class="card mb-4" id="storageStatusBanner" style="border-left: 4px solid var(--brand-primary, #6366f1);background:var(--bg-secondary);">
+        <div class="card-body" style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-weight:600;color:var(--text-primary);" id="storageStatusText">Status: Checking connection...</div>
+            <div style="font-size:13px;color:var(--text-tertiary);">Allocated Quota: 5.0 TB Google AI Pro Storage</div>
+          </div>
+          <div id="storageActionButtons"></div>
+        </div>
+      </div>
+
+      <!-- FILTER CONTROLS -->
+      <div class="card mb-4" style="background:var(--bg-secondary);">
+        <div class="card-body" style="padding:16px;">
+          <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;">
+            <div style="flex:1;min-width:200px;">
+              <label style="display:block;font-size:12px;color:var(--text-tertiary);margin-bottom:6px;">Filter by Category</label>
+              <select id="storageCategoryFilter" class="form-control" onchange="StorageManager.filterFiles()">
+                <option value="">All Categories</option>
+                <option value="onboarding">📁 Onboarding Documents</option>
+                <option value="employee_record">📁 Employee Records</option>
+                <option value="payroll">📁 Payroll Slips</option>
+                <option value="policy">📁 Company Policies</option>
+                <option value="general">📁 General Files</option>
+              </select>
+            </div>
+            <div style="flex:1;min-width:200px;">
+              <label style="display:block;font-size:12px;color:var(--text-tertiary);margin-bottom:6px;">Search File Name or Employee Code</label>
+              <input type="text" id="storageSearchInput" class="form-control" placeholder="Search..." oninput="StorageManager.filterFiles()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILE LIST TABLE -->
+      <div class="card" style="background:var(--bg-secondary);">
+        <div class="card-body" style="padding:0;overflow-x:auto;">
+          <table class="table" style="width:100%;margin:0;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border-light);text-align:left;">
+                <th style="padding:12px 16px;">Document Name</th>
+                <th style="padding:12px 16px;">Category</th>
+                <th style="padding:12px 16px;">Associated Code</th>
+                <th style="padding:12px 16px;">Size</th>
+                <th style="padding:12px 16px;">Storage Mode</th>
+                <th style="padding:12px 16px;">Uploaded Date</th>
+                <th style="padding:12px 16px;text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="storageFileListBody">
+              <tr>
+                <td colspan="7" style="padding:30px;text-align:center;color:var(--text-tertiary);">
+                  Loading documents...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    StorageManager.refreshFiles();
+  },
+
+  // ========== EMPLOYEE SELFCARE DASHBOARD ==========
+  async renderSelfcare() {
+    const user = State.currentUser;
+    const empCode = user?.employeeCode || 'PRI014';
+    
+    // Find matching employee record in database
+    const emp = State.employees.find(e => e.EmployeeCode === empCode) || {
+      EmployeeName: user?.name || 'Employee Member',
+      EmployeeCode: empCode,
+      Designation: 'Territory Business Manager',
+      Division: 'Sales',
+      HQ: 'Nellore',
+      EmploymentStatus: 'Confirmed',
+      DOJ: '2023-04-10'
+    };
+
+    const tenure = Utils.calculateTenure(emp.DOJ);
+    const myJoining = State.joining.filter(j => j.EmployeeCode === empCode);
+    const myConfirmation = State.confirmation.filter(c => c.EmployeeCode === empCode);
+    const myLeave = State.leave.filter(l => l.EmployeeCode === empCode);
+    const myPayroll = State.payroll.filter(p => p.EmployeeCode === empCode);
+
+    const content = document.getElementById('contentArea');
+    content.innerHTML = `
+      <!-- WELCOME HEADER -->
+      <div style="background:linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);padding:28px;border-radius:var(--radius-lg, 12px);color:white;margin-bottom:24px;box-shadow:var(--shadow-md);">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+          <div style="display:flex;align-items:center;gap:18px;">
+            <div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.25);border:2px solid rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;">
+              ${Utils.getInitials(emp.EmployeeName)}
+            </div>
+            <div>
+              <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;opacity:0.85;">Employee Selfcare Portal</div>
+              <h1 style="margin:2px 0 4px;font-size:24px;font-weight:700;">Welcome, ${Utils.escapeHtml(emp.EmployeeName)}</h1>
+              <div style="font-size:13px;opacity:0.9;display:flex;gap:12px;flex-wrap:wrap;">
+                <span>ID: <strong>${emp.EmployeeCode}</strong></span>
+                <span>•</span>
+                <span>${Utils.escapeHtml(emp.Designation)}</span>
+                <span>•</span>
+                <span>${emp.Division} (${emp.HQ})</span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-secondary" onclick="StorageManager.showUploadModal()" style="background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.4);">
+              <span>⬆️</span> Upload Personal Doc
+            </button>
+            <button class="btn btn-secondary" onclick="App.navigate('storage')" style="background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.4);">
+              <span>📁</span> My Documents
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUICK STATS -->
+      <div class="kpi-grid mb-4">
+        <div class="kpi-card accent-blue">
+          <div class="kpi-icon blue">📅</div>
+          <div class="kpi-label">Date of Joining</div>
+          <div class="kpi-value" style="font-size:18px;">${emp.DOJ || 'N/A'}</div>
+          <div class="kpi-change neutral">Tenure: ${tenure.years}y ${tenure.months}m</div>
+        </div>
+        <div class="kpi-card accent-green">
+          <div class="kpi-icon green">⭐</div>
+          <div class="kpi-label">Employment Status</div>
+          <div class="kpi-value" style="font-size:18px;">${emp.EmploymentStatus}</div>
+          <div class="kpi-change positive">Verified & Active</div>
+        </div>
+        <div class="kpi-card accent-purple">
+          <div class="kpi-icon purple">🏖️</div>
+          <div class="kpi-label">Leave Balance</div>
+          <div class="kpi-value" style="font-size:18px;">18.5 Days</div>
+          <div class="kpi-change neutral">Annual Entitlement</div>
+        </div>
+        <div class="kpi-card accent-orange">
+          <div class="kpi-icon orange">☁️</div>
+          <div class="kpi-label">5 TB Cloud Storage</div>
+          <div class="kpi-value" style="font-size:18px;">Active</div>
+          <div class="kpi-change positive">Google AI Pro Quota</div>
+        </div>
+      </div>
+
+      <!-- SELFCARE SECTIONS -->
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:24px;">
+        <!-- MY PROFILE DETAILS CARD -->
+        <div class="card" style="background:var(--bg-secondary);">
+          <div class="card-header" style="padding:16px 20px;border-bottom:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="margin:0;font-size:16px;">My Employment Information</h3>
+            <span class="badge" style="background:rgba(16,185,129,0.15);color:#10b981;padding:4px 10px;border-radius:20px;font-size:11px;">Active</span>
+          </div>
+          <div class="card-body" style="padding:20px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div>
+                <label style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.5px;">Full Legal Name</label>
+                <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-top:2px;">${emp.EmployeeName}</div>
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.5px;">Employee Code</label>
+                <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-top:2px;">${emp.EmployeeCode}</div>
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.5px;">Designation</label>
+                <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-top:2px;">${emp.Designation}</div>
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.5px;">Division & Unit</label>
+                <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-top:2px;">${emp.Division}</div>
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.5px;">Base Location / HQ</label>
+                <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-top:2px;">${emp.HQ}</div>
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.5px;">Corporate Email</label>
+                <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-top:2px;">${user?.email || 'vamsi.krishna@primus.local'}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUICK ACTIONS & PASSWORD CHANGE -->
+        <div class="card" style="background:var(--bg-secondary);">
+          <div class="card-header" style="padding:16px 20px;border-bottom:1px solid var(--border-light);">
+            <h3 style="margin:0;font-size:16px;">Account & Security</h3>
+          </div>
+          <div class="card-body" style="padding:20px;">
+            <p style="font-size:13px;color:var(--text-tertiary);margin-top:0;">Manage your security credentials and personal document storage.</p>
+            <button class="btn btn-outline" style="width:100%;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="App.showChangePasswordModal()">
+              <span>🔑</span> Change Password
+            </button>
+            <button class="btn btn-outline" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="App.navigate('storage')">
+              <span>📄</span> View My Uploaded Files
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ATTENDANCE (CLOCK IN / CLOCK OUT) & EXPENSE TRACKING MODULES -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+        <!-- CLOCK IN / CLOCK OUT CARD -->
+        <div class="card" style="background:var(--bg-secondary);">
+          <div class="card-header" style="padding:16px 20px;border-bottom:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px;">
+              <span>⏰</span> Daily Attendance & Punching
+            </h3>
+            <span class="badge" id="clockStatusBadge" style="background:rgba(16,185,129,0.15);color:#10b981;padding:4px 10px;border-radius:20px;font-size:11px;">Ready</span>
+          </div>
+          <div class="card-body" style="padding:20px;">
+            <div style="text-align:center;padding:10px 0 20px;">
+              <div style="font-size:36px;font-weight:700;color:var(--text-primary);letter-spacing:1px;" id="liveClockDisplay">--:--:--</div>
+              <div style="font-size:13px;color:var(--text-tertiary);margin-top:4px;" id="liveDateDisplay">${new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+            </div>
+
+            <div style="display:flex;gap:12px;margin-bottom:16px;">
+              <button class="btn btn-primary" id="btnClockIn" onclick="SelfcareActions.clockIn()" style="flex:1;padding:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;">
+                <span>🟢</span> Clock In
+              </button>
+              <button class="btn btn-secondary" id="btnClockOut" onclick="SelfcareActions.clockOut()" style="flex:1;padding:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;">
+                <span>🔴</span> Clock Out
+              </button>
+            </div>
+
+            <div style="background:var(--bg-tertiary);border-radius:var(--radius-md,8px);padding:14px;border:1px solid var(--border-light);">
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;">
+                <span style="color:var(--text-tertiary);">Shift Timing:</span>
+                <span style="font-weight:600;color:var(--text-primary);">09:30 AM – 06:30 PM (General)</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;">
+                <span style="color:var(--text-tertiary);">Today's First In:</span>
+                <span style="font-weight:600;color:var(--text-primary);" id="todayFirstIn">Not clocked in</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;">
+                <span style="color:var(--text-tertiary);">Today's Last Out:</span>
+                <span style="font-weight:600;color:var(--text-primary);" id="todayLastOut">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EXPENSE TRACKING & REIMBURSEMENT CARD -->
+        <div class="card" style="background:var(--bg-secondary);">
+          <div class="card-header" style="padding:16px 20px;border-bottom:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px;">
+              <span>💳</span> Travel & Expense Reimbursement
+            </h3>
+            <button class="btn btn-sm btn-primary" onclick="SelfcareActions.showAddExpenseModal()" style="padding:4px 10px;font-size:12px;">
+              + New Claim
+            </button>
+          </div>
+          <div class="card-body" style="padding:20px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+              <div style="background:var(--bg-tertiary);padding:12px;border-radius:var(--radius-md,8px);border:1px solid var(--border-light);">
+                <div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;">Pending Approval</div>
+                <div style="font-size:18px;font-weight:700;color:var(--text-primary);margin-top:4px;" id="expensePendingTotal">₹ 3,450.00</div>
+              </div>
+              <div style="background:var(--bg-tertiary);padding:12px;border-radius:var(--radius-md,8px);border:1px solid var(--border-light);">
+                <div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;">Disbursed This Month</div>
+                <div style="font-size:18px;font-weight:700;color:#10b981;margin-top:4px;" id="expenseApprovedTotal">₹ 12,800.00</div>
+              </div>
+            </div>
+
+            <div style="border:1px solid var(--border-light);border-radius:var(--radius-md,8px);overflow:hidden;">
+              <table class="table" style="width:100%;font-size:12px;margin:0;">
+                <thead>
+                  <tr style="background:var(--bg-tertiary);border-bottom:1px solid var(--border-light);text-align:left;">
+                    <th style="padding:8px 12px;">Date</th>
+                    <th style="padding:8px 12px;">Category</th>
+                    <th style="padding:8px 12px;">Amount</th>
+                    <th style="padding:8px 12px;text-align:right;">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="expenseListBody">
+                  <tr style="border-bottom:1px solid var(--border-light);">
+                    <td style="padding:8px 12px;">20 Oct 2026</td>
+                    <td style="padding:8px 12px;">Client Travel (HQ-Nellore)</td>
+                    <td style="padding:8px 12px;font-weight:600;">₹ 1,850.00</td>
+                    <td style="padding:8px 12px;text-align:right;"><span class="badge" style="background:#fef3c7;color:#d97706;padding:2px 6px;border-radius:4px;">Pending</span></td>
+                  </tr>
+                  <tr style="border-bottom:1px solid var(--border-light);">
+                    <td style="padding:8px 12px;">15 Oct 2026</td>
+                    <td style="padding:8px 12px;">Team Working Lunch</td>
+                    <td style="padding:8px 12px;font-weight:600;">₹ 1,600.00</td>
+                    <td style="padding:8px 12px;text-align:right;"><span class="badge" style="background:#fef3c7;color:#d97706;padding:2px 6px;border-radius:4px;">Pending</span></td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 12px;">02 Oct 2026</td>
+                    <td style="padding:8px 12px;">Field Hotel Accommodation</td>
+                    <td style="padding:8px 12px;font-weight:600;">₹ 12,800.00</td>
+                    <td style="padding:8px 12px;text-align:right;"><span class="badge" style="background:#dcfce7;color:#16a34a;padding:2px 6px;border-radius:4px;">Paid</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Initialize clock ticker
+    SelfcareActions.startClockTicker();
+  }
 };
 
 // ==========================================
@@ -2162,10 +2745,12 @@ const ProfileTabs = {
       payroll: () => this.renderDataTab('Payroll', d.empPayroll, ['Month','TotalPayroll','SalaryReleased','Deductions','NetSalary','PayrollStatus']),
       joining: () => this.renderJoiningTab(d.empJoining),
       resignation: () => this.renderResignationTab(d.empResignation),
+      documents: () => '<div id="empDocsHost"><p style="color:var(--text-muted);">Loading documents…</p></div>',
       activity: () => this.renderActivityTab(d.empAudit)
     };
     
     if (renderers[tabName]) el.innerHTML = renderers[tabName]();
+    if (tabName === 'documents') EmpDocs.load(d.emp);
   },
 
   renderOverview(emp) {
@@ -2258,6 +2843,310 @@ const ProfileTabs = {
         </div>
       </div>
     `).join('');
+  }
+};
+
+// ==========================================
+// EMPLOYEE HR DOCUMENTS & VAULT MANAGEMENT (Admin UI)
+// ==========================================
+const EmpDocs = {
+  currentEmp: null,
+  docs: [],
+  categories: [
+    'Onboarding Documents', 'Offer Letter', 'Appointment Letter', 'Employment Agreement',
+    'Confirmation Letter', 'Promotion Letter', 'Salary Revision Letter', 'Payslips',
+    'Tax Documents', 'Form 16', 'Experience Letter', 'Relieving Letter', 'Other HR Documents'
+  ],
+
+  async load(emp) {
+    if (!emp) return;
+    this.currentEmp = emp;
+    const host = document.getElementById('empDocsHost');
+    if (!host) return;
+
+    host.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:1rem;">
+        <div>
+          <h3 style="margin:0;font-size:1.15rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:0.5rem;">
+            <span>📁</span> Employee Documents &amp; HR Vault
+          </h3>
+          <p style="margin:0.25rem 0 0;font-size:0.85rem;color:var(--text-muted);">
+            Upload official documents (Onboarding documents, payslips, promotion letters, offer letter, etc.) for <strong>${Utils.escapeHtml(emp.EmployeeName)}</strong> (${Utils.escapeHtml(emp.EmployeeCode)}). Uploaded documents appear automatically in their ESS Document Vault.
+          </p>
+        </div>
+        <button class="btn btn-primary" onclick="EmpDocs.showUploadModal()" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.55rem 1rem;">
+          <span>➕</span> Upload Document
+        </button>
+      </div>
+      <div id="empDocsTableArea">
+        <p style="color:var(--text-muted);font-style:italic;">Loading documents from server…</p>
+      </div>
+    `;
+
+    try {
+      const res = await fetch(`/api/hr-docs/employee/${encodeURIComponent(emp.EmployeeCode)}`);
+      if (!res.ok) throw new Error('Failed to load documents: HTTP ' + res.status);
+      const data = await res.json();
+      this.docs = data.documents || [];
+      if (Array.isArray(data.categories) && data.categories.length) {
+        this.categories = data.categories;
+      }
+      this.renderTable();
+    } catch (err) {
+      const area = document.getElementById('empDocsTableArea');
+      if (area) {
+        area.innerHTML = `<div style="padding:1rem;background:rgba(239,68,68,0.1);color:#ef4444;border-radius:8px;font-size:0.9rem;">
+          ⚠️ ${Utils.escapeHtml(err.message)}
+        </div>`;
+      }
+    }
+  },
+
+  renderTable() {
+    const area = document.getElementById('empDocsTableArea');
+    if (!area) return;
+
+    if (!this.docs.length) {
+      area.innerHTML = `
+        <div style="text-align:center;padding:2.5rem 1rem;background:var(--bg-card,#1e293b);border:1px dashed var(--border-color,#334155);border-radius:10px;">
+          <div style="font-size:2.2rem;margin-bottom:0.5rem;">📂</div>
+          <h4 style="margin:0 0 0.35rem;color:var(--text-primary);font-size:1rem;">No Documents in Vault</h4>
+          <p style="margin:0 0 1.25rem;color:var(--text-muted);font-size:0.85rem;">
+            No official documents have been uploaded for ${Utils.escapeHtml(this.currentEmp.EmployeeName)} yet.
+          </p>
+          <button class="btn btn-primary" onclick="EmpDocs.showUploadModal()" style="padding:0.45rem 0.9rem;font-size:0.85rem;">
+            <span>➕</span> Upload First Document
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    const rows = this.docs.map(doc => {
+      const statusBadge = doc.status === 'Active'
+        ? `<span class="status-badge status-active" style="background:rgba(34,197,94,0.15);color:#22c55e;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-weight:600;">Active</span>`
+        : `<span class="status-badge" style="background:rgba(239,68,68,0.15);color:#ef4444;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-weight:600;">Revoked</span>`;
+
+      const sizeKb = doc.fileSize ? Math.round(doc.fileSize / 1024) + ' KB' : '-';
+      const uploadDate = doc.createdAt ? new Date(doc.createdAt).toLocaleDateString() : '-';
+
+      return `
+        <tr style="border-bottom:1px solid var(--border-color,#334155);">
+          <td style="padding:0.75rem 0.6rem;">
+            <div style="font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:0.4rem;">
+              <span>📄</span> ${Utils.escapeHtml(doc.title)}
+            </div>
+            <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">
+              ${Utils.escapeHtml(doc.fileName || '')} · ${sizeKb}
+            </div>
+          </td>
+          <td style="padding:0.75rem 0.6rem;">
+            <span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.78rem;background:rgba(59,130,246,0.15);color:#60a5fa;font-weight:500;">
+              ${Utils.escapeHtml(doc.category)}
+            </span>
+          </td>
+          <td style="padding:0.75rem 0.6rem;font-size:0.85rem;color:var(--text-secondary);">
+            ${Utils.escapeHtml(doc.period || '-')}
+          </td>
+          <td style="padding:0.75rem 0.6rem;font-size:0.82rem;color:var(--text-muted);">
+            <div>${uploadDate}</div>
+            <div style="font-size:0.75rem;">by ${Utils.escapeHtml(doc.uploaderEmail || 'HR')}</div>
+          </td>
+          <td style="padding:0.75rem 0.6rem;">
+            ${statusBadge}
+          </td>
+          <td style="padding:0.75rem 0.6rem;text-align:right;white-space:nowrap;">
+            <button class="btn btn-sm" onclick="EmpDocs.download('${doc.id}')" title="Download / Preview" style="padding:3px 8px;font-size:0.78rem;margin-right:4px;">
+              ⬇️ View
+            </button>
+            ${doc.status === 'Active' ? `
+              <button class="btn btn-sm" onclick="EmpDocs.revoke('${doc.id}', '${Utils.escapeHtml(doc.title)}')" title="Revoke access" style="padding:3px 8px;font-size:0.78rem;margin-right:4px;background:rgba(234,179,8,0.15);color:#eab308;border:1px solid rgba(234,179,8,0.3);">
+                🚫 Revoke
+              </button>
+            ` : ''}
+            <button class="btn btn-sm" onclick="EmpDocs.deleteDoc('${doc.id}', '${Utils.escapeHtml(doc.title)}')" title="Delete permanently" style="padding:3px 8px;font-size:0.78rem;background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);">
+              🗑️
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    area.innerHTML = `
+      <div class="table-responsive" style="overflow-x:auto;">
+        <table class="data-table" style="width:100%;border-collapse:collapse;font-size:0.875rem;">
+          <thead>
+            <tr style="text-align:left;border-bottom:2px solid var(--border-color,#334155);color:var(--text-muted);font-size:0.78rem;text-transform:uppercase;">
+              <th style="padding:0.5rem 0.6rem;">Document</th>
+              <th style="padding:0.5rem 0.6rem;">Category</th>
+              <th style="padding:0.5rem 0.6rem;">Period / FY</th>
+              <th style="padding:0.5rem 0.6rem;">Uploaded</th>
+              <th style="padding:0.5rem 0.6rem;">Status</th>
+              <th style="padding:0.5rem 0.6rem;text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+    `;
+  },
+
+  showUploadModal() {
+    if (!this.currentEmp) return;
+    const emp = this.currentEmp;
+
+    const categoryOptions = this.categories.map(c => `<option value="${Utils.escapeHtml(c)}">${Utils.escapeHtml(c)}</option>`).join('');
+
+    const bodyHtml = `
+      <form id="hrDocUploadForm" onsubmit="event.preventDefault(); EmpDocs.submitUpload();">
+        <div style="margin-bottom:0.85rem;">
+          <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.3rem;color:var(--text-secondary);">Employee</label>
+          <input type="text" class="form-control" value="${Utils.escapeHtml(emp.EmployeeName)} (${Utils.escapeHtml(emp.EmployeeCode)})" disabled style="width:100%;background:rgba(0,0,0,0.2);">
+        </div>
+
+        <div style="margin-bottom:0.85rem;">
+          <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.3rem;color:var(--text-secondary);">Document Category *</label>
+          <select id="hrDocCategory" class="form-control" required style="width:100%;">
+            ${categoryOptions}
+          </select>
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">Select Onboarding documents, Payslips, Offer letter, Promotion letter, etc.</div>
+        </div>
+
+        <div style="margin-bottom:0.85rem;">
+          <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.3rem;color:var(--text-secondary);">Document Title *</label>
+          <input type="text" id="hrDocTitle" class="form-control" required placeholder="e.g., Q3 Promotion Letter, Offer Letter, or October 2026 Payslip" style="width:100%;">
+        </div>
+
+        <div style="margin-bottom:0.85rem;">
+          <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.3rem;color:var(--text-secondary);">Period / Financial Year (Optional)</label>
+          <input type="text" id="hrDocPeriod" class="form-control" placeholder="e.g., FY 2025-26, Oct 2026" style="width:100%;">
+        </div>
+
+        <div style="margin-bottom:0.85rem;">
+          <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.3rem;color:var(--text-secondary);">Select File * (PDF, Word, Image, up to 15MB)</label>
+          <input type="file" id="hrDocFileInput" class="form-control" required accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt" style="width:100%;">
+        </div>
+
+        <div style="margin-bottom:0.85rem;">
+          <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.3rem;color:var(--text-secondary);">HR Remarks / Notes (Optional)</label>
+          <textarea id="hrDocRemarks" class="form-control" rows="2" placeholder="e.g., Signed copy verified and uploaded by HR" style="width:100%;resize:vertical;"></textarea>
+        </div>
+      </form>
+    `;
+
+    const footerHtml = `
+      <button class="btn btn-secondary" onclick="document.getElementById('modalOverlay').classList.remove('active')">Cancel</button>
+      <button class="btn btn-primary" id="hrDocUploadBtn" onclick="EmpDocs.submitUpload()">
+        <span>📤</span> Upload to Employee Vault
+      </button>
+    `;
+
+    App.showModal('Upload Document for ' + emp.EmployeeName, bodyHtml, footerHtml);
+  },
+
+  async submitUpload() {
+    if (!this.currentEmp) return;
+    const emp = this.currentEmp;
+
+    const catEl = document.getElementById('hrDocCategory');
+    const titleEl = document.getElementById('hrDocTitle');
+    const periodEl = document.getElementById('hrDocPeriod');
+    const remarksEl = document.getElementById('hrDocRemarks');
+    const fileEl = document.getElementById('hrDocFileInput');
+    const btn = document.getElementById('hrDocUploadBtn');
+
+    if (!titleEl || !titleEl.value.trim()) {
+      App.showToast('Please enter a document title', 'error');
+      if (titleEl) titleEl.focus();
+      return;
+    }
+    if (!fileEl || !fileEl.files || !fileEl.files.length) {
+      App.showToast('Please select a file to upload', 'error');
+      return;
+    }
+
+    const file = fileEl.files[0];
+    if (file.size > 15 * 1024 * 1024) {
+      App.showToast('File size must be under 15 MB', 'error');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('employeeCode', emp.EmployeeCode);
+    formData.append('employeeName', emp.EmployeeName || '');
+    formData.append('category', catEl ? catEl.value : 'Other HR Documents');
+    formData.append('title', titleEl.value.trim());
+    formData.append('period', periodEl ? periodEl.value.trim() : '');
+    formData.append('remarks', remarksEl ? remarksEl.value.trim() : '');
+    formData.append('file', file);
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span> Uploading…';
+    }
+
+    try {
+      const res = await fetch('/api/hr-docs/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Upload failed');
+      }
+
+      document.getElementById('modalOverlay').classList.remove('active');
+      App.showToast('Uploaded "' + titleEl.value.trim() + '" to ' + emp.EmployeeName + "'s HR Vault!", 'success');
+      await this.load(emp);
+    } catch (err) {
+      App.showToast(err.message || 'Upload failed', 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>📤</span> Upload to Employee Vault';
+      }
+    }
+  },
+
+  download(docId) {
+    window.open('/api/hr-docs/' + encodeURIComponent(docId) + '/download', '_blank');
+  },
+
+  async revoke(docId, title) {
+    if (!confirm('Are you sure you want to revoke "' + title + '" from the employee\'s vault? The document will no longer be visible in their ESS.')) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/hr-docs/' + encodeURIComponent(docId) + '/revoke', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: 'Revoked by HR Admin' })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Revoke failed');
+      App.showToast('Document "' + title + '" revoked', 'info');
+      await this.load(this.currentEmp);
+    } catch (err) {
+      App.showToast(err.message || 'Revoke failed', 'error');
+    }
+  },
+
+  async deleteDoc(docId, title) {
+    if (!confirm('Permanently delete "' + title + '"? This cannot be undone.')) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/hr-docs/' + encodeURIComponent(docId), {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Delete failed');
+      App.showToast('Document "' + title + '" deleted', 'info');
+      await this.load(this.currentEmp);
+    } catch (err) {
+      App.showToast(err.message || 'Delete failed', 'error');
+    }
   }
 };
 
@@ -3182,6 +4071,704 @@ const MasterData = {
     App.showToast(`Removed from ${category}`, 'success');
   }
 };
+
+// ==========================================
+// EMPLOYEE SELFCARE ACTIONS (Clock In/Out, Expenses)
+// ==========================================
+const SelfcareActions = {
+  tickerInterval: null,
+  firstInTime: null,
+  lastOutTime: null,
+
+  startClockTicker() {
+    if (this.tickerInterval) clearInterval(this.tickerInterval);
+    const updateTime = () => {
+      const clockEl = document.getElementById('liveClockDisplay');
+      if (clockEl) {
+        const now = new Date();
+        clockEl.textContent = now.toLocaleTimeString();
+      }
+    };
+    updateTime();
+    this.tickerInterval = setInterval(updateTime, 1000);
+
+    // Restore today's punches from localStorage if available
+    const savedFirstIn = localStorage.getItem('todayFirstIn');
+    const savedLastOut = localStorage.getItem('todayLastOut');
+    const badge = document.getElementById('clockStatusBadge');
+    
+    if (savedFirstIn) {
+      this.firstInTime = savedFirstIn;
+      const el = document.getElementById('todayFirstIn');
+      if (el) el.textContent = savedFirstIn;
+      if (badge) {
+        badge.textContent = 'Clocked In';
+        badge.style.background = 'rgba(16,185,129,0.15)';
+        badge.style.color = '#10b981';
+      }
+    }
+    if (savedLastOut) {
+      this.lastOutTime = savedLastOut;
+      const el = document.getElementById('todayLastOut');
+      if (el) el.textContent = savedLastOut;
+      if (badge) {
+        badge.textContent = 'Shift Ended';
+        badge.style.background = 'rgba(239,68,68,0.15)';
+        badge.style.color = '#ef4444';
+      }
+    }
+  },
+
+  async clockIn() {
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    this.firstInTime = timeStr;
+    localStorage.setItem('todayFirstIn', timeStr);
+
+    const firstInEl = document.getElementById('todayFirstIn');
+    if (firstInEl) firstInEl.textContent = timeStr;
+
+    const badge = document.getElementById('clockStatusBadge');
+    if (badge) {
+      badge.textContent = 'Clocked In';
+      badge.style.background = 'rgba(16,185,129,0.15)';
+      badge.style.color = '#10b981';
+    }
+
+    await db.logAudit({
+      Module: 'Selfcare Attendance',
+      Action: 'Clock In',
+      Record: State.currentUser?.employeeCode || 'PRI014',
+      Field: 'Punch In',
+      OldValue: '',
+      NewValue: timeStr
+    });
+
+    App.showToast(`Punched IN successfully at ${timeStr}`, 'success');
+  },
+
+  async clockOut() {
+    if (!this.firstInTime && !localStorage.getItem('todayFirstIn')) {
+      App.showToast('You must clock in first before clocking out', 'warning');
+      return;
+    }
+
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    this.lastOutTime = timeStr;
+    localStorage.setItem('todayLastOut', timeStr);
+
+    const lastOutEl = document.getElementById('todayLastOut');
+    if (lastOutEl) lastOutEl.textContent = timeStr;
+
+    const badge = document.getElementById('clockStatusBadge');
+    if (badge) {
+      badge.textContent = 'Shift Ended';
+      badge.style.background = 'rgba(239,68,68,0.15)';
+      badge.style.color = '#ef4444';
+    }
+
+    await db.logAudit({
+      Module: 'Selfcare Attendance',
+      Action: 'Clock Out',
+      Record: State.currentUser?.employeeCode || 'PRI014',
+      Field: 'Punch Out',
+      OldValue: '',
+      NewValue: timeStr
+    });
+
+    App.showToast(`Punched OUT successfully at ${timeStr}`, 'info');
+  },
+
+  showAddExpenseModal() {
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const modalFooter = document.getElementById('modalFooter');
+
+    modalTitle.textContent = 'Submit Expense Claim';
+    modalBody.innerHTML = `
+      <form id="addExpenseForm" onsubmit="SelfcareActions.handleAddExpense(event)">
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text-primary);">Expense Category</label>
+          <select id="expenseCategory" class="form-control" required>
+            <option value="Client Travel">🚗 Field / Client Travel</option>
+            <option value="Accommodation">🏨 Hotel / Accommodation</option>
+            <option value="Daily Allowance">🍽️ Daily Allowance & Meals</option>
+            <option value="Stationery / Office">📁 Stationery & Office Supplies</option>
+            <option value="Other">💼 Miscellaneous</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          <div>
+            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text-primary);">Amount (INR ₹)</label>
+            <input type="number" step="0.01" id="expenseAmount" class="form-control" required placeholder="e.g. 1500">
+          </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text-primary);">Expense Date</label>
+            <input type="date" id="expenseDate" class="form-control" required value="${new Date().toISOString().split('T')[0]}">
+          </div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text-primary);">Description / Purpose</label>
+          <textarea id="expenseDescription" class="form-control" rows="2" placeholder="e.g. Travel to client HQ for business review" required></textarea>
+        </div>
+      </form>
+    `;
+
+    modalFooter.innerHTML = `
+      <button class="btn btn-secondary" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="document.getElementById('addExpenseForm').requestSubmit()">Submit Claim</button>
+    `;
+
+    document.getElementById('modalOverlay').classList.add('active');
+  },
+
+  async handleAddExpense(e) {
+    e.preventDefault();
+    const category = document.getElementById('expenseCategory').value;
+    const amount = parseFloat(document.getElementById('expenseAmount').value) || 0;
+    const date = document.getElementById('expenseDate').value;
+    const desc = document.getElementById('expenseDescription').value;
+
+    const tbody = document.getElementById('expenseListBody');
+    if (tbody) {
+      const tr = document.createElement('tr');
+      tr.style.borderBottom = '1px solid var(--border-light)';
+      tr.innerHTML = `
+        <td style="padding:8px 12px;">${date}</td>
+        <td style="padding:8px 12px;">${Utils.escapeHtml(category)} - ${Utils.escapeHtml(desc)}</td>
+        <td style="padding:8px 12px;font-weight:600;">₹ ${amount.toFixed(2)}</td>
+        <td style="padding:8px 12px;text-align:right;"><span class="badge" style="background:#fef3c7;color:#d97706;padding:2px 6px;border-radius:4px;">Pending</span></td>
+      `;
+      tbody.insertBefore(tr, tbody.firstChild);
+    }
+
+    App.showToast(`Expense claim of ₹ ${amount.toFixed(2)} submitted for approval!`, 'success');
+    App.closeModal();
+  }
+};
+
+// ==========================================
+// CLOUD STORAGE & DOCUMENT MANAGER
+// ==========================================
+const StorageManager = {
+  rawFiles: [],
+
+  async refreshFiles() {
+    try {
+      const res = await fetch('/api/files');
+      if (!res.ok) {
+        if (res.status === 401) {
+          window.location.href = 'login.html';
+          return;
+        }
+        throw new Error('Failed to load files');
+      }
+
+      const data = await res.json();
+      this.rawFiles = data.files || [];
+
+      // Update banner status
+      const statusText = document.getElementById('storageStatusText');
+      const actionButtons = document.getElementById('storageActionButtons');
+
+      if (statusText && data.storageStatus) {
+        if (data.storageStatus.isGoogleDriveActive) {
+          statusText.innerHTML = `
+            <span style="color:#10b981;">● Cloud Connected</span>: 
+            Google Drive 5 TB Active Sandbox (${data.files.length} documents stored)
+          `;
+          if (actionButtons) {
+            actionButtons.innerHTML = `
+              <span class="badge" style="background:rgba(16,185,129,0.15);color:#10b981;padding:6px 12px;border-radius:20px;font-size:12px;">
+                ☁️ 5 TB AI Pro Quota
+              </span>
+            `;
+          }
+        } else {
+          statusText.innerHTML = `
+            <span style="color:#f59e0b;">● Local Staging Mode</span>: 
+            Files saved locally. Run <code>npm run storage:setup</code> to link your 5 TB Google Drive quota.
+          `;
+          if (actionButtons) {
+            actionButtons.innerHTML = `
+              <span class="badge" style="background:rgba(245,158,11,0.15);color:#f59e0b;padding:6px 12px;border-radius:20px;font-size:12px;">
+                Local Mode
+              </span>
+            `;
+          }
+        }
+      }
+
+      this.filterFiles();
+    } catch (err) {
+      console.error('refreshFiles error:', err);
+      const tbody = document.getElementById('storageFileListBody');
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--danger,#ef4444);">Failed to load documents: ${err.message}</td></tr>`;
+      }
+    }
+  },
+
+  filterFiles() {
+    const category = document.getElementById('storageCategoryFilter')?.value || '';
+    const query = document.getElementById('storageSearchInput')?.value.toLowerCase().trim() || '';
+
+    const filtered = this.rawFiles.filter(file => {
+      const matchCat = !category || file.category === category;
+      const matchQuery = !query || 
+        (file.originalName && file.originalName.toLowerCase().includes(query)) ||
+        (file.employeeCode && file.employeeCode.toLowerCase().includes(query));
+      return matchCat && matchQuery;
+    });
+
+    this.renderTable(filtered);
+  },
+
+  renderTable(files) {
+    const tbody = document.getElementById('storageFileListBody');
+    if (!tbody) return;
+
+    if (files.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" style="padding:40px;text-align:center;color:var(--text-tertiary);">
+            <div style="font-size:36px;margin-bottom:8px;">📂</div>
+            <div>No documents found in this view.</div>
+            <div style="font-size:12px;margin-top:4px;">Click "Upload Document" to add files to cloud storage.</div>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    const categoryBadges = {
+      onboarding: '<span class="badge" style="background:#e0f2fe;color:#0284c7;padding:3px 8px;border-radius:4px;font-size:11px;">Onboarding</span>',
+      employee_record: '<span class="badge" style="background:#fef3c7;color:#d97706;padding:3px 8px;border-radius:4px;font-size:11px;">Employee Record</span>',
+      payroll: '<span class="badge" style="background:#dcfce7;color:#16a34a;padding:3px 8px;border-radius:4px;font-size:11px;">Payroll Slip</span>',
+      policy: '<span class="badge" style="background:#f3e8ff;color:#9333ea;padding:3px 8px;border-radius:4px;font-size:11px;">Policy</span>',
+      general: '<span class="badge" style="background:#f1f5f9;color:#475569;padding:3px 8px;border-radius:4px;font-size:11px;">General</span>'
+    };
+
+    const formatBytes = (bytes) => {
+      if (!bytes) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return (bytes / Math.pow(k, i)).toFixed(1) + ' ' + sizes[i];
+    };
+
+    tbody.innerHTML = files.map(file => {
+      const modeBadge = file.storageType === 'google_drive'
+        ? '<span style="color:#10b981;font-size:12px;display:flex;align-items:center;gap:4px;">☁️ Google Drive</span>'
+        : '<span style="color:#f59e0b;font-size:12px;display:flex;align-items:center;gap:4px;">💻 Local</span>';
+
+      return `
+        <tr style="border-bottom:1px solid var(--border-light);">
+          <td style="padding:12px 16px;font-weight:500;color:var(--text-primary);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+            📄 ${file.originalName}
+          </td>
+          <td style="padding:12px 16px;">${categoryBadges[file.category] || file.category}</td>
+          <td style="padding:12px 16px;color:var(--text-secondary);">${file.employeeCode || '<span style="color:var(--text-tertiary)">—</span>'}</td>
+          <td style="padding:12px 16px;font-size:12px;color:var(--text-tertiary);">${formatBytes(file.sizeBytes)}</td>
+          <td style="padding:12px 16px;">${modeBadge}</td>
+          <td style="padding:12px 16px;font-size:12px;color:var(--text-tertiary);">${new Date(file.createdAt).toLocaleDateString()}</td>
+          <td style="padding:12px 16px;text-align:right;">
+            <div style="display:inline-flex;gap:8px;">
+              <a href="/api/files/${file._id}/download" class="btn btn-sm btn-secondary" style="padding:4px 10px;font-size:12px;text-decoration:none;" title="Download">
+                ⬇️ Download
+              </a>
+              ${file.driveWebViewLink ? `
+                <a href="${file.driveWebViewLink}" target="_blank" class="btn btn-sm btn-secondary" style="padding:4px 10px;font-size:12px;text-decoration:none;" title="Open in Google Drive">
+                  🔗 Drive
+                </a>
+              ` : ''}
+              <button class="btn btn-sm btn-danger" style="padding:4px 8px;font-size:12px;" onclick="StorageManager.deleteFile('${file._id}', '${file.originalName}')" title="Delete">
+                🗑️
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  },
+
+  showUploadModal() {
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const modalFooter = document.getElementById('modalFooter');
+
+    modalTitle.textContent = 'Upload Document to Cloud Storage';
+    modalBody.innerHTML = `
+      <form id="storageUploadForm" onsubmit="StorageManager.handleUpload(event)">
+        <div style="margin-bottom:16px;">
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text-primary);">Select File</label>
+          <input type="file" id="uploadFileInput" required class="form-control" style="padding:8px;" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.png,.jpg,.jpeg">
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px;">Supported: PDF, DOCX, XLSX, CSV, JPG, PNG (Max: 50MB)</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div>
+            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text-primary);">Document Category</label>
+            <select id="uploadCategorySelect" class="form-control" required>
+              <option value="onboarding">📁 Onboarding Document</option>
+              <option value="employee_record">📁 Employee Record</option>
+              <option value="payroll">📁 Payroll Slip</option>
+              <option value="policy">📁 Company Policy</option>
+              <option value="general" selected>📁 General Document</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text-primary);">Associated Employee Code</label>
+            <input type="text" id="uploadEmployeeCode" class="form-control" placeholder="e.g. EMP-101 (optional)">
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text-primary);">Access Permission</label>
+          <select id="uploadAccessLevel" class="form-control">
+            <option value="admin_hr_only" selected>🔒 Admin & HR Managers Only</option>
+            <option value="employee_private">👤 Assigned Employee & HR Only</option>
+            <option value="public_company">🌐 Company-Wide (All Employees)</option>
+          </select>
+        </div>
+
+        <div id="uploadProgressContainer" style="display:none;margin-top:12px;">
+          <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:4px;">Streaming to cloud storage...</div>
+          <div style="width:100%;height:6px;background:var(--border-light);border-radius:3px;overflow:hidden;">
+            <div style="width:100%;height:100%;background:var(--brand-primary,#6366f1);animation:pulse 1.5s infinite;"></div>
+          </div>
+        </div>
+      </form>
+    `;
+
+    modalFooter.innerHTML = `
+      <button class="btn btn-secondary" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="document.getElementById('storageUploadForm').requestSubmit()">Upload</button>
+    `;
+
+    document.getElementById('modalOverlay').classList.add('active');
+  },
+
+  async handleUpload(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('uploadFileInput');
+    if (!fileInput || !fileInput.files[0]) {
+      App.showToast('Please select a file', 'warning');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    formData.append('category', document.getElementById('uploadCategorySelect').value);
+    formData.append('employeeCode', document.getElementById('uploadEmployeeCode').value.trim());
+    formData.append('accessLevel', document.getElementById('uploadAccessLevel').value);
+
+    const progress = document.getElementById('uploadProgressContainer');
+    if (progress) progress.style.display = 'block';
+
+    try {
+      const res = await fetch('/api/files/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Upload failed');
+
+      App.showToast(result.message || 'File uploaded successfully!', 'success');
+      App.closeModal();
+      this.refreshFiles();
+    } catch (err) {
+      App.showToast('Upload error: ' + err.message, 'error');
+      if (progress) progress.style.display = 'none';
+    }
+  },
+
+  async deleteFile(fileId, fileName) {
+    if (!confirm(`Are you sure you want to delete "${fileName}"? This will remove the file from cloud storage.`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/files/${fileId}`, { method: 'DELETE' });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Delete failed');
+
+      App.showToast('File removed successfully', 'success');
+      this.refreshFiles();
+    } catch (err) {
+      App.showToast('Delete error: ' + err.message, 'error');
+    }
+  }
+};
+
+// Top navigation & user session helpers
+App.toggleUserMenu = function() {
+  const menu = document.getElementById('userMenuDropdown');
+  if (menu) {
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+  }
+};
+
+// ==========================================
+// HR ADMIN NOTIFICATIONS & APPROVALS (BELL ICON)
+// ==========================================
+App.toggleNotificationMenu = function(e) {
+  if (e) e.stopPropagation();
+  const dropdown = document.getElementById('headerNotificationDropdown');
+  const userMenu = document.getElementById('userMenuDropdown');
+  if (userMenu) userMenu.style.display = 'none';
+
+  if (dropdown) {
+    const isShowing = dropdown.style.display === 'block';
+    dropdown.style.display = isShowing ? 'none' : 'block';
+    if (!isShowing) {
+      App.refreshNotifications();
+    }
+  }
+};
+
+App.refreshNotifications = async function(e) {
+  if (e) e.stopPropagation();
+  const dot = document.getElementById('headerNotifDot');
+  const pill = document.getElementById('notifBadgePill');
+  const body = document.getElementById('notifDropdownBody');
+
+  try {
+    const res = await fetch('/api/ess/approvals/admin/notifications');
+    let pending = [];
+    let recent = [];
+    if (res.ok) {
+      const data = await res.json();
+      pending = data.pending || [];
+      recent = data.recentDecisions || [];
+    }
+
+    // Also collect any probation alerts from State
+    const probationEmps = (State && State.employees ? State.employees : []).filter(emp => emp.EmploymentStatus === 'Probation');
+    const totalCount = pending.length + (probationEmps.length ? 1 : 0);
+
+    if (dot) dot.style.display = totalCount > 0 ? 'block' : 'none';
+    if (pill) {
+      pill.style.display = totalCount > 0 ? 'inline-block' : 'none';
+      pill.textContent = totalCount;
+    }
+
+    if (!body) return;
+
+    if (totalCount === 0 && recent.length === 0) {
+      body.innerHTML = `
+        <div style="padding:24px 16px;text-align:center;color:var(--text-muted);">
+          <div style="font-size:24px;margin-bottom:6px;">✨</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text-primary);">All Caught Up!</div>
+          <div style="font-size:12px;margin-top:2px;">No pending employee claims or urgent alerts right now.</div>
+        </div>
+      `;
+      return;
+    }
+
+    let html = '';
+
+    // 1. Pending Approvals Section
+    if (pending.length > 0) {
+      html += `
+        <div style="padding:6px 14px;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--accent-primary,#0e8a5f);letter-spacing:0.5px;">
+          Pending Approvals (${pending.length})
+        </div>
+      `;
+      html += pending.map(item => {
+        const icon = item.kind === 'leave' ? '🏖️' : item.kind === 'expense' ? '💰' : '⏰';
+        const stage = (item.stages || [])[item.currentStage] || {};
+        const roleLabel = stage.role ? stage.role.toUpperCase() : 'HR';
+        const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
+        return `
+          <div style="padding:10px 14px;border-bottom:1px solid var(--border-light);transition:background 0.2s;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background='transparent'">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+              <div style="font-size:13px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:6px;">
+                <span>${icon}</span> ${Utils.escapeHtml(item.title || item.requestId)}
+              </div>
+              <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(234,179,8,0.15);color:#eab308;font-weight:700;white-space:nowrap;">
+                WAITING ${roleLabel}
+              </span>
+            </div>
+            <div style="font-size:12px;color:var(--text-secondary);margin:3px 0 6px;">
+              <strong>${Utils.escapeHtml(item.employeeName)}</strong> (${Utils.escapeHtml(item.employeeCode)}) · ${dateStr}
+            </div>
+            <div style="display:flex;gap:6px;margin-top:4px;">
+              <button class="btn btn-sm" onclick="App.quickDecide('${item.requestId}', 'approve')" style="flex:1;padding:4px 8px;font-size:11px;background:#0e8a5f;color:#fff;border:none;border-radius:4px;font-weight:600;cursor:pointer;">
+                ✓ Approve
+              </button>
+              <button class="btn btn-sm" onclick="App.quickDecide('${item.requestId}', 'reject')" style="flex:1;padding:4px 8px;font-size:11px;background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);border-radius:4px;font-weight:600;cursor:pointer;">
+                ✕ Reject
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 2. Probation Alert
+    if (probationEmps.length > 0) {
+      html += `
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border-light);background:rgba(245,158,11,0.06);display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div>
+            <div style="font-size:12px;font-weight:600;color:#f59e0b;">⚠️ Probation Reviews Due</div>
+            <div style="font-size:11px;color:var(--text-muted);">${probationEmps.length} employee(s) currently on probation</div>
+          </div>
+          <button class="btn btn-sm" onclick="App.navigate('probation'); document.getElementById('headerNotificationDropdown').style.display='none';" style="font-size:11px;padding:3px 8px;">Review</button>
+        </div>
+      `;
+    }
+
+    // 3. Recent Decisions
+    if (recent.length > 0) {
+      html += `
+        <div style="padding:8px 14px 4px;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">
+          Recent Decisions
+        </div>
+      `;
+      html += recent.slice(0, 5).map(r => {
+        const lastDec = (r.decisions || []).slice(-1)[0] || {};
+        const isApp = r.status === 'Approved';
+        const color = isApp ? '#22c55e' : '#ef4444';
+        const badgeBg = isApp ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)';
+        const approver = lastDec.actorEmail || 'approver';
+        const timeStr = lastDec.at ? new Date(lastDec.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
+        return `
+          <div style="padding:8px 14px;border-bottom:1px solid var(--border-light);font-size:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-weight:600;color:var(--text-primary);">${Utils.escapeHtml(r.requestId)}</span>
+              <span style="font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;background:${badgeBg};color:${color};">${r.status.toUpperCase()}</span>
+            </div>
+            <div style="color:var(--text-muted);font-size:11px;margin-top:2px;">
+              By <strong>${Utils.escapeHtml(approver)}</strong> · ${timeStr}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    body.innerHTML = html;
+  } catch (err) {
+    if (body) {
+      body.innerHTML = `<div style="padding:14px;color:#ef4444;font-size:12px;">Failed to load notifications: ${Utils.escapeHtml(err.message)}</div>`;
+    }
+  }
+};
+
+App.quickDecide = async function(requestId, action) {
+  let remarks = '';
+  if (action === 'reject') {
+    remarks = prompt('Enter rejection reason (required):');
+    if (!remarks || remarks.trim().length < 3) {
+      App.showToast('Rejection remarks (min 3 characters) are required', 'error');
+      return;
+    }
+  } else {
+    remarks = 'Approved by HR Admin via Notification Center';
+  }
+
+  try {
+    const res = await fetch('/api/ess/approvals/admin/quick-decide', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requestId, action, remarks })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Decision failed');
+
+    App.showToast(`Request ${requestId} ${action}d successfully! Confirmation email dispatched.`, 'success');
+    App.refreshNotifications();
+  } catch (err) {
+    App.showToast(err.message, 'error');
+  }
+};
+
+// Global click handler to close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+  const notifWrapper = document.getElementById('headerNotifWrapper');
+  const notifMenu = document.getElementById('headerNotificationDropdown');
+  if (notifMenu && notifMenu.style.display === 'block') {
+    if (notifWrapper && !notifWrapper.contains(e.target)) {
+      notifMenu.style.display = 'none';
+    }
+  }
+
+  const userWrapper = document.getElementById('headerUserDropdown');
+  const userMenu = document.getElementById('userMenuDropdown');
+  if (userMenu && userMenu.style.display === 'block') {
+    if (userWrapper && !userWrapper.contains(e.target)) {
+      userMenu.style.display = 'none';
+    }
+  }
+});
+
+App.logout = async function() {
+  try {
+    await fetch('/api/auth/logout', { method: 'POST' });
+  } catch (e) {
+    console.error('Logout error:', e);
+  }
+  sessionStorage.removeItem('isAuthenticated');
+  window.location.href = 'login.html';
+};
+
+App.showChangePasswordModal = function() {
+  const modalTitle = document.getElementById('modalTitle');
+  const modalBody = document.getElementById('modalBody');
+  const modalFooter = document.getElementById('modalFooter');
+
+  modalTitle.textContent = 'Change Password';
+  modalBody.innerHTML = `
+    <form id="changePasswordForm" onsubmit="App.handlePasswordChange(event)">
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text-primary);">Current Password</label>
+        <input type="password" id="currentPassInput" required class="form-control" placeholder="Enter current password">
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text-primary);">New Password</label>
+        <input type="password" id="newPassInput" required minlength="8" class="form-control" placeholder="At least 8 characters">
+      </div>
+    </form>
+  `;
+  modalFooter.innerHTML = `
+    <button class="btn btn-secondary" onclick="App.closeModal()">Cancel</button>
+    <button class="btn btn-primary" onclick="document.getElementById('changePasswordForm').requestSubmit()">Update Password</button>
+  `;
+  document.getElementById('modalOverlay').classList.add('active');
+};
+
+App.handlePasswordChange = async function(e) {
+  e.preventDefault();
+  const currentPassword = document.getElementById('currentPassInput').value;
+  const newPassword = document.getElementById('newPassInput').value;
+
+  try {
+    const res = await fetch('/api/auth/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Failed to update password');
+
+    App.showToast('Password updated successfully!', 'success');
+    App.closeModal();
+  } catch (err) {
+    App.showToast(err.message, 'error');
+  }
+};
+
+// Close user menu on outside click
+document.addEventListener('click', (e) => {
+  const userMenu = document.getElementById('userMenuDropdown');
+  const userDropdown = document.getElementById('headerUserDropdown');
+  if (userMenu && userDropdown && !userDropdown.contains(e.target)) {
+    userMenu.style.display = 'none';
+  }
+});
+
 
 // ==========================================
 // CLICK OUTSIDE SEARCH

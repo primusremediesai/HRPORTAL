@@ -4,7 +4,7 @@
 // ==========================================
 
 const DB_NAME = 'HRPortalDB';
-const DB_VERSION = 3;
+const DB_VERSION = 12;
 
 const STORES = {
   employees: 'employees',
@@ -29,12 +29,22 @@ class HRDatabase {
 
   async init() {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
-      
-      request.onerror = () => reject(request.error);
-      
-      request.onupgradeneeded = (event) => {
-        const db = event.target.result;
+      const openDb = (ver) => {
+        const request = indexedDB.open(DB_NAME, ver);
+        
+        request.onerror = (e) => {
+          if (request.error && request.error.name === 'VersionError') {
+            console.warn('IndexedDB version conflict detected. Recreating clean database...');
+            const delReq = indexedDB.deleteDatabase(DB_NAME);
+            delReq.onsuccess = () => openDb(DB_VERSION);
+            delReq.onerror = () => reject(request.error);
+            return;
+          }
+          reject(request.error);
+        };
+        
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
         
         // Employees store
         if (!db.objectStoreNames.contains(STORES.employees)) {
@@ -123,12 +133,20 @@ class HRDatabase {
         if (!db.objectStoreNames.contains(STORES.settings)) {
           db.createObjectStore(STORES.settings, { keyPath: 'key' });
         }
+
+        // Employee Self-Service (ESS) stores — versioned, additive migration
+        if (typeof ESS !== 'undefined' && ESS.Schema) {
+          ESS.Schema.upgrade(db, event.oldVersion, event.target.transaction);
+        }
       };
       
       request.onsuccess = (event) => {
         this.db = event.target.result;
         resolve(this.db);
       };
+      };
+
+      openDb(DB_VERSION);
     });
   }
 
@@ -241,3 +259,5 @@ class HRDatabase {
 
 // Singleton instance
 const db = new HRDatabase();
+window.db = db;
+window.STORES = STORES;

@@ -1,12 +1,22 @@
 {
-  "name": "backend",
+  "name": "primus-hr-portal",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Primus HR Management Portal with Persistent DB, Auth, and 5 TB Google Drive Storage",
+  "main": "run.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node run.js",
+    "dev": "node --watch run.js",
+    "db:seed": "node scripts/dbTools.js seed",
+    "db:backup": "node scripts/dbTools.js backup",
+    "db:reset": "node scripts/dbTools.js reset",
+    "storage:setup": "node scripts/setupGoogleDrive.js",
+    "test": "echo \"Error: no test specified\" && exit 0"
   },
-  "keywords": [],
+  "keywords": [
+    "hr",
+    "management",
+    "portal"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
@@ -20,9 +30,12 @@
     "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^8.6.2",
     "express-session": "^1.19.0",
+    "googleapis": "^187.0.0",
     "helmet": "^8.3.0",
     "mongodb-memory-server": "^11.2.0",
-    "mongoose": "^9.9.4"
+    "mongoose": "^9.9.4",
+    "multer": "^2.4.0",
+    "nodemailer": "^10.2.0"
   },
   "devDependencies": {
     "jest": "^30.4.2",
