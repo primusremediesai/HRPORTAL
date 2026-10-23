@@ -786,3 +786,272 @@
     font-size: 11px;
   }
 }
+
+/* ==========================================================================
+   ESS - SIDEBAR TOGGLE & RESPONSIVE REFINEMENTS
+   Shell rules are scoped to body.ess-mode (set by js/ess/ess-responsive.js
+   while an ESS screen is active) so the HR admin screens are unaffected.
+   ========================================================================== */
+
+/* --- Viewport fit: the persona bar sits above #app; share the height instead of overflowing --- */
+body.ess-mode {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+body.ess-mode > .ess-role-switcher-bar { flex: 0 0 auto; }
+body.ess-mode > .app-container {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+}
+
+/* --- Sidebar toggle button (header) --- */
+.ess-sidebar-toggle {
+  display: none;
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+body.ess-mode .ess-sidebar-toggle { display: flex; }
+/* The legacy hamburger is replaced by the ESS toggle on ESS screens */
+body.ess-mode #sidebarToggle { display: none !important; }
+
+.ess-sidebar-toggle:focus-visible,
+.ess-sidebar-close:focus-visible,
+body.ess-mode .nav-item.ess-item:focus-visible {
+  outline: 2px solid var(--ess-teal);
+  outline-offset: 2px;
+}
+body.ess-mode .nav-item.ess-item:focus-visible { outline-offset: -2px; }
+
+/* --- Sidebar close control + overlay (hidden unless off-canvas) --- */
+.ess-sidebar-close {
+  display: none;
+  margin-left: auto;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.ess-sidebar-close:hover { background: rgba(255, 255, 255, 0.1); color: #ffffff; }
+.ess-sidebar-overlay { display: none; }
+
+/* --- Desktop: collapse / expand --- */
+@media (min-width: 1025px) {
+  body.ess-mode.ess-sidebar-collapsed .sidebar {
+    width: 0;
+    min-width: 0;
+    border-right-width: 0;
+  }
+}
+
+/* --- Tablet & mobile: off-canvas navigation panel --- */
+@media (max-width: 1024px) {
+  body.ess-mode .sidebar {
+    top: 0;
+    left: -320px;
+    width: min(280px, 86vw);
+    min-width: 0;
+    height: 100vh;
+    height: 100dvh;
+    visibility: hidden;
+    transition: left var(--transition-slow), visibility 0s linear 300ms;
+  }
+  body.ess-mode .sidebar.open {
+    left: 0;
+    visibility: visible;
+    box-shadow: var(--shadow-xl);
+    transition: left var(--transition-slow), visibility 0s;
+  }
+  body.ess-mode .ess-sidebar-close { display: flex; }
+  body.ess-mode .ess-sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 190;
+    background: rgba(15, 23, 42, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0s linear 250ms;
+  }
+  body.ess-mode.ess-sidebar-open .ess-sidebar-overlay {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.25s ease, visibility 0s;
+  }
+  body.ess-mode .sidebar .nav-item { min-height: 44px; }
+  body.ess-mode .sidebar-nav { padding-bottom: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.ess-mode .sidebar,
+  body.ess-mode .sidebar.open,
+  body.ess-mode .ess-sidebar-overlay { transition: none; }
+}
+
+/* --- Calendar grid: never let day cells force the page wider --- */
+.ess-cal-grid { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.ess-cal-cell { min-width: 0; overflow: hidden; }
+
+/* --- Tablet & mobile (<= 768px) --- */
+@media (max-width: 768px) {
+  /* Persona bar */
+  .ess-role-switcher-bar { padding: 6px 12px; font-size: 11px; gap: 6px; }
+  .ess-switcher-select { max-width: 100%; }
+
+  /* Header: toggle + title + actions on row 1, search on row 2 */
+  body.ess-mode .top-header {
+    height: auto;
+    min-height: var(--header-height);
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  body.ess-mode .header-btn { width: 40px; height: 40px; }
+  body.ess-mode .header-breadcrumb {
+    flex: 1 1 0;
+    min-width: 0;
+    order: 1;
+    font-size: 14px;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  body.ess-mode .header-actions { order: 2; margin-left: 0; gap: 4px; }
+  body.ess-mode .header-search {
+    order: 3;
+    flex: 1 1 100%;
+    max-width: none;
+    margin-left: 0;
+  }
+  body.ess-mode .header-user-info { display: none; }
+
+  /* Page container & headings */
+  .ess-container { padding: 12px 12px 78px; }
+  .ess-header-bar { margin-bottom: 16px; gap: 12px; }
+  .ess-title { font-size: 20px; flex-wrap: wrap; }
+  .ess-hero-card { padding: 18px; }
+  .ess-hero-profile { gap: 12px; }
+  .ess-hero-avatar { width: 52px; height: 52px; font-size: 18px; }
+  .ess-hero-name { font-size: 18px; }
+  .ess-hero-clock-box { min-width: 0; }
+  .ess-kpi-grid { gap: 12px; margin-bottom: 16px; }
+  .ess-kpi-card { padding: 12px 14px; min-width: 0; }
+  .ess-quick-actions-bar { padding: 14px; margin-bottom: 16px; }
+  .ess-clock-card { padding: 16px; margin-bottom: 16px; }
+  .ess-container .card { min-width: 0; }
+  .ess-container .card-header { flex-wrap: wrap; gap: 8px; padding: 14px 16px 10px; }
+  .ess-container .card-body { padding: 14px 16px; }
+  .ess-bottom-nav { padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+
+  /* Modals sit above the bottom nav; checkboxes/radios keep their natural size */
+  body.ess-mode .modal-overlay { z-index: 1100; }
+  body.ess-mode .modal input[type="checkbox"],
+  body.ess-mode .modal input[type="radio"] { width: auto; flex: 0 0 auto; }
+
+  /* Inline two-column layouts collapse to one column */
+  .ess-container [style*="minmax(360px"] { grid-template-columns: 1fr !important; }
+
+  /* Touch-friendly controls; 16px inputs prevent iOS focus zoom */
+  .ess-container .btn,
+  body.ess-mode .modal .btn { min-height: 40px; }
+  .ess-container .btn-xs,
+  body.ess-mode .modal .btn-xs { min-height: 36px; padding-left: 12px; padding-right: 12px; }
+  .ess-container input:not([type="checkbox"]):not([type="radio"]),
+  .ess-container select,
+  .ess-container textarea,
+  body.ess-mode .modal input:not([type="checkbox"]):not([type="radio"]),
+  body.ess-mode .modal select,
+  body.ess-mode .modal textarea,
+  body.ess-mode .header-search input { font-size: 16px; }
+
+  /* Tables stack into labelled cards (all columns kept) */
+  .ess-container table.ess-stack { display: block; border: 0; padding: 10px 10px 0; }
+  .ess-stack thead { display: none; }
+  .ess-stack tbody { display: block; }
+  .ess-stack tbody tr {
+    display: block;
+    background: var(--ess-card-bg);
+    border: 1px solid var(--ess-border);
+    border-radius: var(--ess-radius-sm);
+    margin: 0 0 10px;
+    padding: 4px 12px;
+  }
+  .ess-stack tbody td {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 12px;
+    padding: 8px 0;
+    border: 0;
+    border-bottom: 1px solid var(--ess-border-subtle);
+    text-align: right;
+    white-space: normal !important;
+    max-width: none !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    overflow-wrap: anywhere;
+  }
+  .ess-stack tbody td:last-child { border-bottom: 0; }
+  .ess-stack tbody td[data-label]::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    max-width: 45%;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--ess-text-muted);
+  }
+  .ess-stack tbody td.ess-stack-span { display: block; text-align: center; }
+}
+
+/* --- Phones (<= 600px) --- */
+@media (max-width: 600px) {
+  body.ess-mode .header-snapshot { display: none; }
+
+  /* Modals use the screen width and keep actions reachable */
+  body.ess-mode .modal { width: calc(100% - 20px); max-height: 92vh; max-height: 92dvh; border-radius: var(--ess-radius-md); }
+  body.ess-mode .modal-header { padding: 14px 16px 12px; }
+  body.ess-mode .modal-body { padding: 14px 16px; }
+  body.ess-mode .modal-footer { padding: 12px 16px; flex-wrap: wrap; }
+  body.ess-mode .modal-footer .btn { flex: 1 1 120px; justify-content: center; }
+  body.ess-mode .modal [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  body.ess-mode .modal iframe { height: 60vh !important; }
+  .ess-email-field { flex-wrap: wrap; }
+  .ess-email-field label { width: 100%; }
+
+  /* Controls that carry fixed widths inline */
+  #holidaySearchInput { width: 100% !important; }
+  .ess-calendar-header { padding: 12px 14px; }
+  .ess-doc-grid { grid-template-columns: 1fr; }
+  .ess-container table.table:not(.ess-stack) td { white-space: normal; overflow-wrap: anywhere; }
+}
+
+/* --- Small phones (<= 480px) --- */
+@media (max-width: 480px) {
+  .ess-kpi-val { font-size: 22px; }
+  .ess-actions-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .ess-cal-day-header { padding: 6px 2px; font-size: 10px; }
+  .ess-cal-cell { min-height: 52px; padding: 3px; }
+  .ess-cal-date-num { font-size: 10px; margin-bottom: 2px; }
+  .ess-cal-pill { font-size: 8px; padding: 1px 2px; margin-top: 2px; }
+}
